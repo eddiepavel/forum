@@ -1,0 +1,23 @@
+package routes
+
+import (
+	"forum-app/app"
+	"forum-app/handlers/auth"
+	"forum-app/handlers/forum"
+	"forum-app/middleware"
+	"net/http"
+)
+
+func Web(app *app.Application) http.Handler {
+	mux := http.NewServeMux()
+
+	mux.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir("./assets/app"))))
+	mux.HandleFunc("GET /{$}", middleware.ChainMiddleware(forum.GetHome(app), []string{"logs", "headers", "auth"}, app))
+	mux.HandleFunc("GET /login", middleware.ChainMiddleware(auth.GetLogin, []string{"logs", "headers"}, app))
+	mux.HandleFunc("POST /login", middleware.ChainMiddleware(auth.PostLogin(app), []string{"logs", "headers"}, app))
+	mux.HandleFunc("GET /register", middleware.ChainMiddleware(auth.GetRegister, []string{"logs", "headers"}, app))
+	mux.HandleFunc("POST /register", middleware.ChainMiddleware(auth.StoreRegister(app), []string{"logs", "headers"}, app))
+	mux.HandleFunc("GET /logout", middleware.ChainMiddleware(auth.Logout(app), []string{"logs", "headers", "auth"}, app))
+
+	return mux
+}

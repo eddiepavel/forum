@@ -1,0 +1,10 @@
+body {
+    background-color: white;
+}
+
+.form-register {
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+    gap: 10px;
+}
