@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func (db *Connection) SessionExistsDB(userId int) (models.Session, bool, error) {
+func (db *Connection) SessionExistsDB(userId int) (*models.Session, bool, error) {
 	query := `SELECT * FROM session WHERE userId = ? LIMIT 1;`
 	var session models.Session
 
@@ -16,14 +16,14 @@ func (db *Connection) SessionExistsDB(userId int) (models.Session, bool, error) 
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return session, false, nil
+			return nil, false, nil
 		}
 
 		fmt.Printf("Error checking session existence: %v\n", err)
-		return session, false, err
+		return nil, false, err
 	}
 
-	return session, true, err
+	return &session, true, err
 }
 
 func (db *Connection) CreateSession(userId int) (int, error) {
@@ -44,46 +44,19 @@ func (db *Connection) CreateSession(userId int) (int, error) {
 	return int(lastId), err
 }
 
-func (db *Connection) GetSessionById(sessionId int) (models.Session, error) {
-	query := `SELECT * FROM session WHERE id = ? LIMIT 1;`
+func (db *Connection) GetSession(column string, param any) (*models.Session, error){
+	
+	query := fmt.Sprintf("SELECT * FROM session WHERE %s = ? LIMIT 1;", column)
+
 	var session models.Session
 
-	err := db.DB.QueryRow(query, sessionId).Scan(&session.ID, &session.Token, &session.ExpiresAt, &session.UserId)
+	err := db.DB.QueryRow(query, param).Scan(&session.ID, &session.Token, &session.ExpiresAt, &session.UserId)
 
 	if err != nil {
-		fmt.Println("Error fetching session")
-		return session, err
+		return nil, err
 	}
 
-	return session, err
-}
-
-func (db *Connection) GetSessionByToken(token string) (models.Session, error) {
-	query := `SELECT * FROM session WHERE token = ? LIMIT 1;`
-	var session models.Session
-
-	err := db.DB.QueryRow(query, token).Scan(&session.ID, &session.Token, &session.ExpiresAt, &session.UserId)
-
-	if err != nil {
-		fmt.Println("Error fetching session")
-		return session, err
-	}
-
-	return session, err
-}
-
-func (db *Connection) GetSessionByUserId(userId int) (models.Session, error) {
-	query := `SELECT * FROM session WHERE userId = ? LIMIT 1;`
-	var session models.Session
-
-	err := db.DB.QueryRow(query, userId).Scan(&session.ID, &session.Token, &session.ExpiresAt, &session.UserId)
-
-	if err != nil {
-		fmt.Println("Error fetching session")
-		return session, err
-	}
-
-	return session, err
+	return &session, nil
 }
 
 func (db *Connection) DeleteSession(sessionId int) error {

@@ -21,11 +21,10 @@ func AuthMiddleware(next http.HandlerFunc, app *app.Application) http.HandlerFun
 			return
 		}
 
-		session, err := app.DB.GetSessionByToken(cookie.Value)
+		session, err := app.DB.GetSession("token", cookie.Value)
 
-		if err != nil {
+		if err != nil && session == nil {
 			app.Logger.Error("Session not found", "error", err)
-			app.DB.DeleteSession(session.ID)
 			expireCookie := http.Cookie{
 				Name:   "auth-token",
 				Value:  "",

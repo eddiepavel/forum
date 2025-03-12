@@ -7,10 +7,10 @@ import (
 	"time"
 )
 
-func SessionInit(app *app.Application, userId int) (models.Session, error) {
+func SessionInit(app *app.Application, userId int) (*models.Session, error) {
 	session, exists, err := app.DB.SessionExistsDB(userId)
 	if err != nil {
-		return models.Session{}, err
+		return nil, err
 	}
 
 	if exists && !helpers.CompareDatesLess(session.ExpiresAt, time.Now().Format("2006-01-02 15:04:05")) {
@@ -21,12 +21,13 @@ func SessionInit(app *app.Application, userId int) (models.Session, error) {
 
 	newTokenId, err := app.DB.CreateSession(userId)
 	if err != nil {
-		return models.Session{}, err
+		return nil, err
 	}
 
-	session, err = app.DB.GetSessionById(newTokenId)
+	session, err = app.DB.GetSession("id", newTokenId)
+
 	if err != nil {
-		return models.Session{}, err
+		return nil, err
 	}
 
 	return session, nil

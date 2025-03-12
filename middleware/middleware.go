@@ -9,28 +9,27 @@ import (
 type Middleware func(h http.HandlerFunc, app *app.Application) http.HandlerFunc
 
 func ChainMiddleware(h http.HandlerFunc, k []string, app *app.Application) http.HandlerFunc {
+	
+    selectMiddle := map[string]Middleware{
+        "auth":    AuthMiddleware,
+        "headers": CommonHeaders,
+        "logs":    LoggingMiddleware,
+    }
 
-	selectMiddle := map[string]Middleware{
-		"headers": CommonHeaders,
-		"auth":    AuthMiddleware,
-		"logs":    LoggingMiddleware,
-	}
+    globalMiddle := []string{"logs", "headers"}
 
-	if len(k) < 1 {
-		return h
-	}
+    wrapped := h 
 
-	wrapped := h
+    fullMiddlewareList := append(globalMiddle, k...) 
 
-	for i := len(k) - 1; i >= 0; i-- {
-		key := k[i]
-		if mw, exists := selectMiddle[key]; exists {
-			wrapped = mw(wrapped, app)
-		} else {
-			fmt.Printf("Middlware %s not found\n", key)
-		}
-	}
+    for i := len(fullMiddlewareList) - 1; i >= 0; i-- {
+        key := fullMiddlewareList[i]
+        if mw, exists := selectMiddle[key]; exists {
+            wrapped = mw(wrapped, app) 
+        } else {
+            fmt.Printf("Middleware %s not found\n", key)
+        }
+    }
 
-	return wrapped
-
+    return wrapped
 }

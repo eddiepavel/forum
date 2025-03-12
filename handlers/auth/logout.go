@@ -15,8 +15,8 @@ func Logout(app *app.Application) http.HandlerFunc {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
-
-		session, _ := app.DB.GetSessionByUserId(user.ID)
+		
+		session, _ := app.DB.GetSession("userId", user.ID)
 
 		app.DB.DeleteSession(session.ID)
 
