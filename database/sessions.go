@@ -70,3 +70,29 @@ func (db *Connection) DeleteSession(sessionId int) error {
 
 	return err
 }
+
+func (db *Connection) SessionInit(userId int) (*models.Session, error) {
+	session, exists, err := db.SessionExistsDB(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	if exists && !helpers.CompareDatesLess(session.ExpiresAt, time.Now().Format("2006-01-02 15:04:05")) {
+		return session, nil
+	} else if exists {
+		db.DeleteSession(session.ID)
+	}
+
+	newTokenId, err := db.CreateSession(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	session, err = db.GetSession("id", newTokenId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return session, nil
+}

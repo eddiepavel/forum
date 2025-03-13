@@ -5,7 +5,6 @@ import (
 	"forum-app/helpers"
 	"forum-app/helpers/flash"
 	"forum-app/helpers/validator"
-	"forum-app/session"
 	"html/template"
 	"net/http"
 )
@@ -54,7 +53,7 @@ func PostLogin(app *app.Application) http.HandlerFunc {
 			return
 		}
 
-		session, _ := session.SessionInit(app, user.ID)
+		session, _ := app.DB.SessionInit(user.ID)
 
 		maxAge := helpers.DdSessionTimeSeconds(session.ExpiresAt.Format("2006-01-02 15:04:05"))
 

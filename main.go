@@ -5,10 +5,12 @@ import (
 	"forum-app/app"
 	"forum-app/database"
 	"forum-app/routes"
+	"forum-app/session"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
+	"time"
 )
 
 func main() {
@@ -28,9 +30,12 @@ func main() {
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
+	session := session.NewSessionStore(1*time.Minute, 1*time.Minute)
+
 	app := &app.Application{
 		DB:     db,
 		Logger: logger,
+		Session: session,
 	}
 
 	server := http.Server{
