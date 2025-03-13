@@ -15,16 +15,18 @@ func ChainMiddleware(h http.HandlerFunc, k []string, app *app.Application) http.
 		"headers": CommonHeaders,
 		"logs":    LoggingMiddleware,
 		"session": SessionMiddleware,
+		"csrf":    CsrfTokenMiddlware,
 	}
 
-	globalMiddle := []string{"logs", "headers", "session"}
+	globalMiddle := []string{"logs", "headers", "csrf", "session"}
 
 	wrapped := h
 
 	fullMiddlewareList := append(globalMiddle, k...)
 
-	for i := len(fullMiddlewareList) - 1; i >= 0; i-- {
+	for i := 0 ; i <= len(fullMiddlewareList) - 1 ; i++ {
 		key := fullMiddlewareList[i]
+		fmt.Println(key)
 		if mw, exists := selectMiddle[key]; exists {
 			wrapped = mw(wrapped, app)
 		} else {

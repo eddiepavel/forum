@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"forum-app/app"
 	"net/http"
 )
@@ -8,7 +9,6 @@ import (
 func SessionMiddleware(next http.HandlerFunc, app *app.Application) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		getSessionCookie, err := r.Cookie("session")
-
 		if err != nil {
 			session := app.Session.CreateSession()
 			sessionCookie := &http.Cookie{
@@ -19,16 +19,23 @@ func SessionMiddleware(next http.HandlerFunc, app *app.Application) http.Handler
 			}
 
 			http.SetCookie(w, sessionCookie)
-			next(w, r)
+			context := context.WithValue(r.Context(), "user_session", session)
+
+			next(w, r.WithContext(context))
 			return
 		}
 
-		_, exists := app.Session.GetSession(getSessionCookie.Value)
+		session, exists := app.Session.GetSession(getSessionCookie.Value)
 
-		if !exists {
+		if exists {
 			app.Session.RefreshSession(getSessionCookie.Value)
+			getSessionCookie.MaxAge = int(app.Session.SessionDuration.Seconds())
+			http.SetCookie(w, getSessionCookie)
+
 		}
 
-		next(w, r)
+		context := context.WithValue(r.Context(), "user_session", session)
+
+		next(w, r.WithContext(context))
 	})
 }
