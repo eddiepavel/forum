@@ -12,7 +12,7 @@ func CsrfTokenMiddlware(next http.HandlerFunc, app *app.Application) http.Handle
 		cookie, err := r.Cookie("session")
 
 		if err != nil {
-			next(w,r)
+			next(w, r)
 			return
 		}
 
@@ -29,6 +29,17 @@ func CsrfTokenMiddlware(next http.HandlerFunc, app *app.Application) http.Handle
 			next(w, r)
 			return
 		}
+
+		// Handle POST request: Validate CSRF token
+		formCsrfToken := r.FormValue("csrf_token")
+		sessionCsrfToken, ok := session.Data["csrf"].(string)
+
+		if !ok || formCsrfToken != sessionCsrfToken {
+			http.Error(w, "Invalid CSRF token", http.StatusForbidden)
+			return
+		}
+
+		next(w, r)
 
 	})
 }
