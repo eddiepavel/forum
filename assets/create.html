@@ -11,7 +11,7 @@
 <body>
     <header class="bg-white">
         <nav class="mx-auto flex items-center justify-between p-6 lg:px-8" aria-label="Global">
-          <a href="/assets/home.html" class="-m-1.5 p-1.5">
+          <a href="/" class="-m-1.5 p-1.5">
             <span class="sr-only">Your Company</span>
             <img class="h-8 w-auto" src="/assets/app/logo.png" alt="Your Company"></a>
           <div class="flex lg:hidden">
@@ -34,7 +34,7 @@
           <div class="hidden fixed inset-0 z-10"></div>
           <div id="menu" class="hidden fixed inset-y-0 right-0 z-10 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
             <div class="flex items-center justify-between">
-              <a href="#" class="-m-1.5 p-1.5">
+              <a href="/" class="-m-1.5 p-1.5">
                 <span class="sr-only">Your Company</span>
                 <img class="h-8 w-auto" src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600" alt="">
               </a>
@@ -60,7 +60,6 @@
       </header>
       
       <form method="post" id="post-form" action="/create" class="h-full">
-        <input type="hidden" name="csrf_token" value="{{.csrf_token}}">
         <div class="space-y-10 mt-5 mx-10 min-h-full">
           <div class="border-b border-gray-900/10 pb-12">
             <h2 class="text-base/7 font-semibold text-gray-900">Post</h2>
@@ -99,32 +98,34 @@
               </button>
           
               <ul id="category-list" class="absolute hidden z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base ring-1 shadow-lg ring-black/5 focus:outline-hidden sm:text-sm" id="options" role="listbox">
-                <!--
-                  Combobox option, manage highlight styles based on mouseenter/mouseleave and keyboard navigation.
-          
-                  Active: "text-white bg-indigo-600 outline-hidden", Not Active: "text-gray-900"
-                -->
                 <li id="item-1" class="relative cursor-default py-2 pr-4 pl-8 text-gray-900 select-none" id="option-0" role="option" tabindex="-1">
-                  <!-- Selected: "font-semibold" -->
-                  <span class="block truncate">Leslie Alexander</span>
-          
-                  <!--
-                    Checkmark, only display for selected option.
-          
-                    Active: "text-white", Not Active: "text-indigo-600"
-                  -->
+                  <span class="block truncate">General</span>
                   <span id="check-1" class="absolute inset-y-0 left-0 flex items-center pl-1.5 text-white">
                     <svg class="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
                       <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
                     </svg>
                   </span>
                 </li>
-          
-                <!-- More items... -->
+                <li id="item-2" class="relative cursor-default py-2 pr-4 pl-8 text-gray-900 select-none" id="option-0" role="option" tabindex="-1">
+                  <span class="block truncate">Tech</span>
+                  <span id="check-2" class="absolute inset-y-0 left-0 flex items-center pl-1.5 text-white">
+                    <svg class="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
+                      <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
+                    </svg>
+                  </span>
+                </li>
+                <li id="item-3" class="relative cursor-default py-2 pr-4 pl-8 text-gray-900 select-none" id="option-0" role="option" tabindex="-1">
+                  <span class="block truncate">Sports</span>
+                  <span id="check-3" class="absolute inset-y-0 left-0 flex items-center pl-1.5 text-white">
+                    <svg class="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
+                      <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
+                    </svg>
+                  </span>
+                </li>
               </ul>
             </div>
           </div>
-
+          <input type="hidden" name="category" id="selected-category">
           <div class="fixed bottom-5 left-0 w-full bg-white flex items-center justify-end gap-x-6 p-4">
             <a href="/">
                 <button type="button"  class="text-sm/6 font-semibold text-gray-900">Cancel</button>
@@ -132,7 +133,7 @@
             <button type="submit" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Save</button>
         </div>
           
-
+        <input type="hidden" name="csrf" value="{{index .Session.Data "csrf" }}">
       </form>
       
 </body>

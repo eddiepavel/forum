@@ -1,7 +1,6 @@
 package forum
 
 import (
-	"fmt"
 	"forum-app/app"
 	"forum-app/middleware"
 	"forum-app/models"
@@ -14,7 +13,6 @@ func GetHome(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user, ok := r.Context().Value(middleware.UserKey).(*models.Users)
 		session := r.Context().Value("user_session").(*session.Session)
-		fmt.Println(session)
 
 		data := PageData{}
 		if ok && user != nil {
@@ -22,6 +20,7 @@ func GetHome(app *app.Application) http.HandlerFunc {
 		} else {
 			data = PageData{User: nil, Session: session}
 		}
+
 		t, err := template.ParseFiles("./assets/home.html")
 
 		if err != nil {

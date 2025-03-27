@@ -2,6 +2,9 @@ package auth
 
 import (
 	"forum-app/app"
+	"forum-app/handlers/forum"
+	"forum-app/session"
+
 	"forum-app/helpers"
 	"forum-app/helpers/flash"
 	"forum-app/helpers/validator"
@@ -9,37 +12,17 @@ import (
 	"net/http"
 )
 
-func GetLogin(app *app.Application) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		// Generate CSRF token
-		cookie, err := r.Cookie("session")
-		if err != nil {
-			http.Error(w, "Session not found", http.StatusUnauthorized)
-			return
-		}
+func GetLogin(w http.ResponseWriter, r *http.Request) {
+	session := r.Context().Value("user_session").(*session.Session)
+	data := forum.PageData{Session: session}
 
-		session, exists := app.Session.GetSession(cookie.Value)
-		if !exists {
-			http.Error(w, "Session expired", http.StatusUnauthorized)
-			return
-		}
-
-		csrfToken, _ := helpers.GenerateToken()
-		session.Data["csrf"] = csrfToken
-
-		// Pass CSRF token to the template
-		data := map[string]interface{}{
-			"csrf_token": csrfToken,
-		}
-
-		t, err := template.ParseFiles("./assets/login.html")
-		if err != nil {
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return
-		}
-
-		t.Execute(w, data)
+	t, err := template.ParseFiles("./assets/login.html")
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
+
+	t.Execute(w, data)
+
 }
 
 func PostLogin(app *app.Application) http.HandlerFunc {

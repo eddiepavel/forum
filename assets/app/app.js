@@ -1,12 +1,12 @@
-
 document.addEventListener('DOMContentLoaded', () => {
     const dropDownButton = document.getElementById('drop-down');
     const combobox = document.getElementById('combobox');
     const categoryList = document.getElementById('category-list');
     const listItems = document.querySelectorAll('#category-list li');
+    const hiddenCategoryInput = document.getElementById('selected-category');
     const form = document.getElementById('post-form');
 
-        // Close the menu when clicking the "menu-untoggle" button
+    // Close the menu when clicking the "menu-untoggle" button
     document.getElementById('menu-untoggle').addEventListener('click', function () {
         const menu = document.getElementById('menu');
         menu.classList.add('hidden', 'pointer-events-none', 'invisible'); // Add classes to hide the menu
@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Function to toggle the dropdown
     const toggleDropdown = () => {
-    categoryList.classList.toggle('hidden');
+        categoryList.classList.toggle('hidden');
     };
 
     // Add event listeners for dropdown toggle
@@ -29,43 +29,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Add click event listeners to list items
     listItems.forEach((item) => {
-    item.addEventListener('click', () => {
-        const checkIcon = item.querySelector('span#check-1');
+        item.addEventListener('click', () => {
+            const selectedCategory = item.querySelector('span.block').textContent.trim();
 
-        if (checkIcon) {
-        // Check if the clicked item is already active
-        if (checkIcon.classList.contains('text-indigo-600')) {
-            // If active, deactivate it
-            checkIcon.classList.remove('text-indigo-600');
-            checkIcon.classList.add('text-white');
-        } else {
-            // Otherwise, deactivate all items and activate the clicked one
+            // Update the combobox input with the selected category
+            combobox.value = selectedCategory;
+
+            // Update the hidden input with the selected category
+            hiddenCategoryInput.value = selectedCategory;
+
+            // Optionally hide the dropdown
+            categoryList.classList.add('hidden');
+
+            // Highlight the selected item
             listItems.forEach((li) => {
-            const otherCheckIcon = li.querySelector('span#check-1');
-            if (otherCheckIcon) {
-                otherCheckIcon.classList.remove('text-indigo-600');
-                otherCheckIcon.classList.add('text-white');
-            }
+                const checkIcon = li.querySelector('span[id^="check-"]');
+                if (checkIcon) {
+                    checkIcon.classList.add('text-white');
+                    checkIcon.classList.remove('text-indigo-600');
+                }
             });
 
-            // Activate the clicked item
-            checkIcon.classList.remove('text-white');
-            checkIcon.classList.add('text-indigo-600');
-        }
-        }
-    });
+            const checkIcon = item.querySelector('span[id^="check-"]');
+            if (checkIcon) {
+                checkIcon.classList.remove('text-white');
+                checkIcon.classList.add('text-indigo-600');
+            }
+        });
     });
 
     // Form submission validation
     form.addEventListener('submit', (event) => {
-    const isAnyItemActive = Array.from(listItems).some((item) => {
-        const checkIcon = item.querySelector('span#check-1');
-        return checkIcon && checkIcon.classList.contains('text-indigo-600');
-    });
-
-    if (!isAnyItemActive) {
-        event.preventDefault(); // Prevent form submission
-        alert('Please select at least one category before posting.');
-    }
+        if (!hiddenCategoryInput.value) {
+            event.preventDefault(); // Prevent form submission
+            alert('Please select a category before submitting.');
+        }
     });
 });

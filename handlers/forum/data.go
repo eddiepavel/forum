@@ -6,7 +6,7 @@ import (
 )
 
 type PageData struct {
-	Data []interface{}
-	User *models.Users
+	Data    []interface{}
+	User    *models.Users
 	Session *session.Session
 }
