@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"forum-app/app"
 	"forum-app/handlers/forum"
+	"forum-app/middleware"
+	"forum-app/models"
 	"forum-app/session"
 	"html/template"
 	"net/http"
@@ -11,8 +13,9 @@ import (
 
 // GetCreate is a handler function that returns the create forum page.
 func GetCreate(w http.ResponseWriter, r *http.Request) {
+	user, _ := r.Context().Value(middleware.UserKey).(*models.Users)
 	session := r.Context().Value("user_session").(*session.Session)
-	data := forum.PageData{Session: session}
+	data := forum.PageData{User: user, Session: session}
 
 	t, err := template.ParseFiles("./assets/create.html")
 	if err != nil {

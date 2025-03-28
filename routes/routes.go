@@ -20,6 +20,7 @@ func Web(app *app.Application) http.Handler {
 	mux.HandleFunc("GET /logout", middleware.ChainMiddleware(auth.Logout(app), []string{"auth"}, app))
 	mux.HandleFunc("GET /create", middleware.ChainMiddleware(auth.GetCreate, []string{"auth"}, app))
 	mux.HandleFunc("POST /create", middleware.ChainMiddleware(auth.PostCreate(app), []string{"auth"}, app))
+	mux.HandleFunc("GET /view", middleware.ChainMiddleware(forum.GetView(app), []string{"auth"}, app))
 
 	return mux
 }

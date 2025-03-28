@@ -9,4 +9,5 @@ type PageData struct {
 	Data    []interface{}
 	User    *models.Users
 	Session *session.Session
+	Posts   []models.Post
 }

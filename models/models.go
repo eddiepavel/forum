@@ -17,3 +17,21 @@ type Session struct {
 	ExpiresAt time.Time
 	UserId    int
 }
+
+type Post struct {
+	ID       int
+	Title    string
+	Category string
+	Content  string
+	Author   string
+	Time     time.Time
+	Likes    int
+	Comments []Comment
+}
+
+type Comment struct {
+	Content string
+	Author  string
+	Time    time.Time
+	Likes   int
+}
