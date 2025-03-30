@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"forum-app/session"
+	"time"
+)
 
 type Users struct {
 	ID        int
@@ -24,7 +27,7 @@ type Post struct {
 	Category string
 	Content  string
 	Author   string
-	Time     time.Time
+	Time     string
 	Likes    int
 	Comments []Comment
 }
@@ -34,4 +37,11 @@ type Comment struct {
 	Author  string
 	Time    time.Time
 	Likes   int
+}
+
+type PageData struct {
+	Data    map[string]interface{}
+	User    *Users
+	Session *session.Session
+	Source  string
 }

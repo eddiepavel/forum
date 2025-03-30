@@ -16,7 +16,8 @@ func CsrfTokenMiddlware(next http.HandlerFunc, app *app.Application) http.Handle
 		}
 
 		session, exists := app.Session.GetSession(cookie.Value)
-		if !exists && session != nil {
+		if !exists || session == nil {
+			fmt.Printf("%+v\n", cookie)
 			http.Error(w, "Session not found or expired", http.StatusUnauthorized)
 			return
 		}

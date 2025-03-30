@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home</title>
+  <link href="/assets/output.css" rel="stylesheet">
+  <script src="/assets/app/app.js"></script>
+</head>
+
+<body>
+  {{if eq .Source "home"}}
+    {{template "nav" .}}
+    {{template "main" .}}
+  {{else}}
+    {{template "nav" .}}
+    {{template "create" .}}
+  {{end}}
+</body>
+
+</html>

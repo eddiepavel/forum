@@ -1,0 +1,23 @@
+{{define "main"}}
+<form id="home">
+    <input type="hidden" id="csrf" value="{{index .Session.Data "csrf" }}">
+</form>
+<div class="relative flex py-6 justify-center sm:py-6 mx-auto px-6 sm:px-6 lg:px-8">
+  <!-- Left Sidebar -->
+    <div class="hidden lg:block lg:w-1/5 bg-gray-50 ml-3 p-4 fixed top-[5rem] left-0 h-full z-10">
+    <!-- Add content for the left sidebar here -->
+      <p>Left Sidebar Content</p>
+    </div>
+    <div class="flex fixed flex-col px-6 lg:flex-row lg:gap-8 max-w-2xl w-full">
+      <div class="items-center mx-auto w-full">
+        <h2 class="text-4xl justify-center flex font-semibold tracking-tight text-pretty text-gray-900 sm:text-5xl">
+          From the blog
+        </h2>
+        <p class="mt-2 py-2 text-sm flex justify-center text-gray-600">
+          Learn how to grow your business with our expert advice.
+        </p>
+        {{template "posts" .}}
+      </div>
+    </div>
+</div>
+{{end}}

@@ -5,8 +5,8 @@ import (
 	"forum-app/middleware"
 	"forum-app/models"
 	"forum-app/session"
+	"html/template"
 	"net/http"
-	"text/template"
 )
 
 func GetView(app *app.Application) http.HandlerFunc {
@@ -14,11 +14,11 @@ func GetView(app *app.Application) http.HandlerFunc {
 		user, ok := r.Context().Value(middleware.UserKey).(*models.Users)
 		session := r.Context().Value("user_session").(*session.Session)
 
-		data := PageData{}
+		data := models.PageData{}
 		if ok && user != nil {
-			data = PageData{User: user, Session: session}
+			data = models.PageData{User: user, Session: session}
 		} else {
-			data = PageData{User: nil, Session: session}
+			data = models.PageData{User: nil, Session: session}
 		}
 
 		t, err := template.ParseFiles("./assets/view.html")

@@ -3,26 +3,25 @@ package auth
 import (
 	"fmt"
 	"forum-app/app"
-	"forum-app/handlers/forum"
-	"forum-app/middleware"
-	"forum-app/models"
-	"forum-app/session"
-	"html/template"
+	"forum-app/render"
 	"net/http"
 )
 
 // GetCreate is a handler function that returns the create forum page.
 func GetCreate(w http.ResponseWriter, r *http.Request) {
-	user, _ := r.Context().Value(middleware.UserKey).(*models.Users)
-	session := r.Context().Value("user_session").(*session.Session)
-	data := forum.PageData{User: user, Session: session}
+	view := render.PrepareView("create", r)
 
-	t, err := template.ParseFiles("./assets/create.html")
-	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	if view.Data.User == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
-	t.Execute(w, data)
+
+	err := view.Render(w, r)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
 }
 
 func PostCreate(app *app.Application) http.HandlerFunc {

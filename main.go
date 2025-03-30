@@ -33,8 +33,8 @@ func main() {
 	session := session.NewSessionStore(1*time.Minute, 1*time.Minute)
 
 	app := &app.Application{
-		DB:     db,
-		Logger: logger,
+		DB:      db,
+		Logger:  logger,
 		Session: session,
 	}
 

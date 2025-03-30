@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Form submission validation
     form.addEventListener('submit', (event) => {
         if (!hiddenCategoryInput.value) {
+            console.log(hiddenCategoryInput.value)
             event.preventDefault(); // Prevent form submission
             alert('Please select a category before submitting.');
         }

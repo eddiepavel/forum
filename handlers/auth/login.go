@@ -1,28 +1,25 @@
 package auth
 
 import (
+	"fmt"
 	"forum-app/app"
-	"forum-app/handlers/forum"
-	"forum-app/session"
+	"forum-app/render"
 
 	"forum-app/helpers"
 	"forum-app/helpers/flash"
 	"forum-app/helpers/validator"
-	"html/template"
 	"net/http"
 )
 
 func GetLogin(w http.ResponseWriter, r *http.Request) {
-	session := r.Context().Value("user_session").(*session.Session)
-	data := forum.PageData{Session: session}
+	view := render.PrepareView("login", r)
 
-	t, err := template.ParseFiles("./assets/login.html")
+	err := view.Render(w, r)
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		fmt.Println(err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
 	}
-
-	t.Execute(w, data)
-
 }
 
 func PostLogin(app *app.Application) http.HandlerFunc {
