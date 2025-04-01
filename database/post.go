@@ -2,14 +2,21 @@ package database
 
 import (
 	"forum-app/models"
+	"forum-app/utils"
 	"time"
 )
 
 func (db *Connection) SetPost(title, category, content, author string) error {
+	// Sanitize input
+	cleanTitle, cleanCategory, cleanContent, err := utils.SanitizePost(title, category, content)
+	if err != nil {
+		return err
+	}
+
 	query := `INSERT INTO post(title, category, content, author, time)
 				VALUES(?, ?, ?, ?, ?)`
 
-	_, err := db.DB.Exec(query, title, category, content, author, time.Now().Format("2006-01-02 15:04:05"))
+	_, err = db.DB.Exec(query, cleanTitle, cleanCategory, cleanContent, author, time.Now().Format("2006-01-02 15:04:05"))
 	return err
 }
 
