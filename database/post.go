@@ -14,7 +14,10 @@ func (db *Connection) SetPost(title, category, content, author string) error {
 }
 
 func (db *Connection) GetPostByID(id int) (models.Post, error) {
-	query := `SELECT id, title, category, content, author, time, likes, comment FROM post WHERE id = ?`
+	query := `SELECT p.id, p.title, p.category, p.content, u.username, p.time, p.likes 
+              FROM post p 
+              JOIN user u ON p.author = u.id 
+              WHERE p.id = ?`
 	var post models.Post
 
 	err := db.DB.QueryRow(query, id).Scan(
@@ -25,8 +28,31 @@ func (db *Connection) GetPostByID(id int) (models.Post, error) {
 		&post.Author,
 		&post.Time,
 		&post.Likes,
-		&post.Comments,
 	)
+	if err != nil {
+		return post, err
+	}
 
-	return post, err
+	// Get comments for the post
+	commentsQuery := `SELECT c.content, u.username, c.time, c.likes 
+                     FROM comment c 
+                     JOIN user u ON c.author = u.id 
+                     WHERE c.post_id = ?`
+
+	rows, err := db.DB.Query(commentsQuery, id)
+	if err != nil {
+		return post, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var comment models.Comment
+		err := rows.Scan(&comment.Content, &comment.Author, &comment.Time, &comment.Likes)
+		if err != nil {
+			return post, err
+		}
+		post.Comments = append(post.Comments, comment)
+	}
+
+	return post, nil
 }
