@@ -12,9 +12,14 @@ import (
 )
 
 func GetLogin(w http.ResponseWriter, r *http.Request) {
-	view := render.PrepareView("login", r)
+	view, err := render.PrepareView("login", r)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
 
-	err := view.Render(w, r)
+	err = view.Render(w, r)
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
@@ -74,7 +79,13 @@ func PostLogin(app *app.Application) http.HandlerFunc {
 
 		app.Logger.Info("User logged in", "email", user.Email)
 
-		http.Redirect(w, r, "/", http.StatusFound)
+		redirectURL := r.FormValue("redirect")
+
+		if redirectURL == "" {
+			redirectURL = "/"
+		}
+
+		http.Redirect(w, r, redirectURL, http.StatusFound)
 	}
 
 }

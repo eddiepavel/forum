@@ -9,14 +9,19 @@ import (
 
 // GetCreate is a handler function that returns the create forum page.
 func GetCreate(w http.ResponseWriter, r *http.Request) {
-	view := render.PrepareView("create", r)
+	view, err := render.PrepareView("create", r)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
 
 	if view.Data.User == nil {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
-	err := view.Render(w, r)
+	err = view.Render(w, r)
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)

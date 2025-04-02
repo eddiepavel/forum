@@ -11,9 +11,14 @@ import (
 )
 
 func GetRegister(w http.ResponseWriter, r *http.Request) {
-	view := render.PrepareView("register", r)
+	view, err := render.PrepareView("register", r)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
 
-	err := view.Render(w, r)
+	err = view.Render(w, r)
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)

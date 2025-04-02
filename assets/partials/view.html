@@ -1,0 +1,135 @@
+{{define "view"}}
+{{$post := index .Data "post"}}
+<div class="items-center w-full flex justify-center">
+    <h2 class="sr-only">Summary</h2>
+    <div class="justify-center rounded-lg bg-gray-50 ring-1 shadow-xs w-4/5 ring-gray-900/5">
+      <dl class="flex flex-wrap">
+        <div class="flex-auto pt-6 pl-6">
+          <div class="font-semibold text-gray-900">{{$post.Title}}</div>
+        </div>
+        <div class="flex justify-center self-end px-6">
+          <dt class="sr-only">Category</dt>
+          <a href="/?category={{$post.Category}}">
+            <dd class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset">{{$post.Category}}</dd>
+          </a>
+        </div>
+        <div class="mt-6 flex items-center w-full flexgap-x-4 border-t border-gray-900/5 px-6 pt-6">
+          <dt class="flex justify-center items-center">
+            <span class="sr-only">Author</span>
+            <img class="h-6 w-6 rounded-full" src="./assets/app/dummy.png" alt="">
+          </dt>
+          <a href="/wip">
+            <dd class="px-2 font-medium text-gray-900">{{$post.Author.Username}}</dd>
+          </a>
+        </div>
+        <div class="flex items-center w-full flex-none gap-x-4 px-6">
+          <dd class="text-xs pl-8 items-center text-gray-500">
+            <time datetime="2023-01-31">{{$post.Time}}</time>
+          </dd>
+        </div>
+        <div class="mt-2 flex w-full flex-none gap-x-4 px-6">
+          <dd class="text-sm pl-8">{{$post.Content}}</dd>
+        </div>
+      </dl>
+      <div class="mt-6 border-t border-gray-900/5 px-6 py-6">
+        {{if not .User}}
+        <a href="/login">
+        <form>
+          <input type="hidden" id="redirect-link" value="{{.Redirect}}">
+        </form>
+        {{end}}
+        <span class="isolate inline-flex rounded-md shadow-xs">
+            <button {{if .User}} id="upvote-01" {{end}} type="button" class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset bg-white focus:z-10" >
+              <span class="sr-only">Upvote</span>
+              <svg class="size-5 transform rotate-90" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
+                <path fill-rule="evenodd" d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd" />
+              </svg>
+              <p class="text-xs px-2 font-semibold text-gray-500">{{$post.Upvotes}}</p>
+            </button>
+            <button type="button" {{if .User}} id="downvote-01" {{end}} class="relative -ml-px inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset bg-white focus:z-10">
+              <span class="sr-only">Downvote</span>
+              <svg class="size-5 transform rotate-90" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
+                <path fill-rule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+              </svg>
+              <p class="text-xs px-2 font-semibold text-gray-500">{{$post.Downvotes}}</p>
+            </button>
+          </span>    
+        {{if not .User}}
+        </a>
+        {{end}}              
+      </div>
+    </div>
+  </div>
+  <div class="items-center w-full justify-center flex">
+    <div class="w-4/5">
+      <p class="mt-5 mb-2 font-medium text-gray-800">Comments</p>
+      {{if .User}}
+      <label for="comment" class="block text-sm/6 font-medium text-gray-900"></label>
+      <div>
+        <form method="post" id="comment-form" action="/wip">
+          <input type="hidden" name="post_id" value="{{$post.ID}}">
+          <input type="hidden" name="csrf" value="{{index .Session.Data "csrf" }}">
+          <textarea rows="2" name="comment" id="comment" placeholder="Add your comment..." class="block w-full resize-none rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+          <div class="flex mt-2 justify-end">
+            <button type="submit" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Post</button>
+          </div>
+        </form>
+      </div>
+      {{end}}
+    </div>
+  </div>
+  {{range $index, $comment := $post.Comments}}
+  <div class="items-center w-full justify-center flex">
+    <div class="w-4/5">
+      <div class="mt-5 flex items-center w-full flexgap-x-4 border-t border-gray-900/5 px-6 pt-6">
+        <dt class="flex justify-center items-center">
+          <span class="sr-only">Author</span>
+          <img class="h-6 w-6 rounded-full" src="./assets/app/dummy.png" alt="">
+        </dt>
+        <a href="/wip">
+          <dd class="px-2 font-medium text-gray-900">{{$comment.Author.Username}}</dd>
+        </a>
+      </div>
+      <div class="flex items-center w-full flex-none gap-x-4 px-6">
+        <dd class="text-xs pl-8 items-center text-gray-500">
+          <time datetime="2023-01-31">{{$comment.Time}}</time>
+        </dd>
+      </div>
+      <div class="mt-2 flex w-full flex-none gap-x-4 px-6">
+        <dd class="text-sm pl-8">{{$comment.Content}}</dd>
+      </div>
+      <div class="px-6 py-2">
+        {{if not $.User}}
+        <a href="/login">
+        <form>
+          <input type="hidden" id="redirect-link" value="{{$.Redirect}}">
+        </form>
+        {{end}}
+        <div class="px-2">
+          <span class="isolate px-6 inline-flex rounded-md">
+            <button {{if $.User}} id="upvote-{{$index}}" {{end}} type="button" class="relative inline-flex items-center rounded-l-md px-1 py-1 text-gray-400 ring-1 ring-gray-300 ring-inset bg-white focus:z-10" >
+              <span class="sr-only">Upvote</span>
+              <svg class="size-4 transform rotate-90" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
+                <path fill-rule="evenodd" d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd" />
+              </svg>
+              <p class="text-xs px-1 font-semibold text-gray-500">{{$comment.Upvotes}}</p>
+            </button>
+            <button type="button" {{if $.User}} id="downvote-{{$index}}" {{end}} class="relative -ml-px inline-flex items-center rounded-r-md px-1 py-1 text-gray-400 ring-1 ring-gray-300 ring-inset bg-white focus:z-10">
+              <span class="sr-only">Downvote</span>
+              <svg class="size-4 transform rotate-90" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
+                <path fill-rule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+              </svg>
+              <p class="text-xs px-1 font-semibold text-gray-500">{{$comment.Downvotes}}</p>
+            </button>
+          </span> 
+        </div>  
+        {{if not $.User}}
+        </a>
+        {{end}}               
+      </div>
+    </div>
+  </div>
+  {{end}}
+</dl>
+  
+{{end}}

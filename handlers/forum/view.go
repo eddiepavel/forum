@@ -1,32 +1,26 @@
 package forum
 
 import (
+	"fmt"
 	"forum-app/app"
-	"forum-app/middleware"
-	"forum-app/models"
-	"forum-app/session"
-	"html/template"
+	"forum-app/render"
 	"net/http"
 )
 
 func GetView(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		user, ok := r.Context().Value(middleware.UserKey).(*models.Users)
-		session := r.Context().Value("user_session").(*session.Session)
-
-		data := models.PageData{}
-		if ok && user != nil {
-			data = models.PageData{User: user, Session: session}
-		} else {
-			data = models.PageData{User: nil, Session: session}
-		}
-
-		t, err := template.ParseFiles("./assets/view.html")
-
+		view, err := render.PrepareView("view", r)
 		if err != nil {
-			http.Error(w, err.Error(), 500)
+			fmt.Println(err)
+			http.Error(w, "Something went wrong", http.StatusInternalServerError)
+			return
 		}
 
-		t.Execute(w, data)
+		err = view.Render(w, r)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(w, "Something went wrong", http.StatusInternalServerError)
+			return
+		}
 	}
 }

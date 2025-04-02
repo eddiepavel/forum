@@ -2,6 +2,7 @@ package models
 
 import (
 	"forum-app/session"
+	"html/template"
 	"time"
 )
 
@@ -22,26 +23,30 @@ type Session struct {
 }
 
 type Post struct {
-	ID       int
-	Title    string
-	Category string
-	Content  string
-	Author   string
-	Time     string
-	Likes    int
-	Comments []Comment
+	ID        int
+	Title     string
+	Category  string
+	Content   template.HTML
+	Author    Users
+	Time      string
+	Upvotes   int
+	Downvotes int
+	Comments  []Comment
 }
 
 type Comment struct {
-	Content string
-	Author  string
-	Time    time.Time
-	Likes   int
+	PostID    int
+	Content   template.HTML
+	Author    Users
+	Time      string
+	Upvotes   int
+	Downvotes int
 }
 
 type PageData struct {
-	Data    map[string]interface{}
-	User    *Users
-	Session *session.Session
-	Source  string
+	Data     map[string]interface{}
+	User     *Users
+	Session  *session.Session
+	Source   string
+	Redirect string
 }

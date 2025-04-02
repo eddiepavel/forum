@@ -1,7 +1,8 @@
 {{define "create"}}
-<form method="post" id="post-form" action="/create">
-    <div class="space-y-10 mt-5 mx-10 min-h-full">
-        <div class="border-b border-gray-900/10 pb-12">
+<!-- <form method="post" id="post-form" action="/create"> -->
+<form method="post" id="post-form" action="/wip">
+    <div class="space-y-10 mt-5 items-center justify-center flex wfull">
+        <div class="border-b w-4/5 border-gray-900/10 pb-12">
             <h2 class="text-base/7 font-semibold text-gray-900">Post</h2>
             <p class="mt-1 text-sm/6 text-gray-600">This information will be displayed publicly so be careful what you share.</p>
             <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
@@ -30,30 +31,16 @@
                     </svg>
                 </button>
                 <ul id="category-list" class="absolute hidden z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base ring-1 shadow-lg ring-black/5 focus:outline-hidden sm:text-sm" role="listbox">
-                    <li id="item-1" class="relative cursor-default py-2 pr-4 pl-8 text-gray-900 select-none" id="option-0" role="option" tabindex="-1">
-                        <span class="block truncate">General</span>
-                        <span id="check-1" class="absolute inset-y-0 left-0 flex items-center pl-1.5 text-white">
-                            <svg class="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-                                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
-                            </svg>
-                        </span>
-                    </li>
-                    <li id="item-2" class="relative cursor-default py-2 pr-4 pl-8 text-gray-900 select-none" id="option-1" role="option" tabindex="-1">
-                        <span class="block truncate">Tech</span>
-                        <span id="check-2" class="absolute inset-y-0 left-0 flex items-center pl-1.5 text-white">
-                            <svg class="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-                                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
-                            </svg>
-                        </span>
-                    </li>
-                    <li id="item-3" class="relative cursor-default py-2 pr-4 pl-8 text-gray-900 select-none" id="option-2" role="option" tabindex="-1">
-                        <span class="block truncate">Sports</span>
-                        <span id="check-3" class="absolute inset-y-0 left-0 flex items-center pl-1.5 text-white">
-                            <svg class="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-                                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
-                            </svg>
-                        </span>
-                    </li>
+                    {{range $index, $category := index .Data "categories"}}
+                        <li id="item-{{$index}}" class="relative cursor-default py-2 pr-4 pl-8 text-gray-900 select-none" role="option" tabindex="-1">
+                            <span class="block truncate">{{$category}}</span>
+                            <span id="check-{{$index}}" class="absolute inset-y-0 left-0 flex items-center pl-1.5 text-white">
+                                <svg class="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
+                                    <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
+                                </svg>
+                            </span>
+                        </li>
+                    {{end}}
                 </ul>
             </div>
         </div>
@@ -65,7 +52,7 @@
         <a href="/">
             <button type="button"  class="text-sm/6 font-semibold text-gray-900">Cancel</button>
         </a>
-        <button type="submit" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Save</button>
+        <button type="submit" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Post</button>
     </div>
     <input type="hidden" name="user_id" value="{{.User.ID}}">
 </form>

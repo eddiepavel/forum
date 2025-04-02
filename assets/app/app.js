@@ -5,17 +5,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const listItems = document.querySelectorAll('#category-list li');
     const hiddenCategoryInput = document.getElementById('selected-category');
     const form = document.getElementById('post-form');
+    const menu = document.getElementById('menu');
+    const menuToggle = document.getElementById('menu-toggle');
+    const menuUntoggle = document.getElementById('menu-untoggle');
 
-    // Close the menu when clicking the "menu-untoggle" button
-    document.getElementById('menu-untoggle').addEventListener('click', function () {
-        const menu = document.getElementById('menu');
-        menu.classList.add('hidden', 'pointer-events-none', 'invisible'); // Add classes to hide the menu
+    // Close the menu with a transition
+    menuUntoggle.addEventListener('click', function () {
+        menu.classList.add('translate-x-full'); // Slide out
+        setTimeout(() => {
+            menu.classList.add('hidden', 'pointer-events-none', 'invisible'); // Hide after transition
+        }, 200); // Match the transition duration
     });
 
-    // Open the menu when clicking the "menu-toggle" button
-    document.getElementById('menu-toggle').addEventListener('click', function () {
-        const menu = document.getElementById('menu');
-        menu.classList.remove('hidden', 'pointer-events-none', 'invisible'); // Remove classes to show the menu
+    // Open the menu with a transition
+    menuToggle.addEventListener('click', function () {
+        menu.classList.remove('hidden', 'pointer-events-none', 'invisible'); // Make visible
+        setTimeout(() => {
+            menu.classList.remove('translate-x-full'); // Slide in
+        }, 20); // Slight delay to ensure transition applies
     });
 
     // Function to toggle the dropdown
@@ -64,6 +71,84 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log(hiddenCategoryInput.value)
             event.preventDefault(); // Prevent form submission
             alert('Please select a category before submitting.');
+        }
+    });
+
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    let voteState = {}; // Tracks the current vote state for each post/comment by ID
+
+    const updateVotes = (type, button, countElement, id) => {
+        if (!voteState[id]) voteState[id] = null; // Initialize vote state for this ID
+
+        if (type === 'upvote') {
+            if (voteState[id] === 'upvote') {
+                countElement.textContent = parseInt(countElement.textContent) - 1;
+                voteState[id] = null;
+                button.classList.remove('bg-blue-100');
+                button.classList.add('bg-white');
+            } else {
+                if (voteState[id] === 'downvote') {
+                    const downvoteButton = document.getElementById(`downvote-${id}`);
+                    const downvoteCount = downvoteButton.querySelector('p');
+                    downvoteCount.textContent = parseInt(downvoteCount.textContent) - 1;
+                    downvoteButton.classList.remove('bg-red-100');
+                    downvoteButton.classList.add('bg-white');
+                }
+                button.classList.remove('bg-white');
+                countElement.textContent = parseInt(countElement.textContent) + 1;
+                voteState[id] = 'upvote';
+                button.classList.add('bg-blue-100');
+            }
+        } else if (type === 'downvote') {
+            if (voteState[id] === 'downvote') {
+                countElement.textContent = parseInt(countElement.textContent) - 1;
+                voteState[id] = null;
+                button.classList.remove('bg-red-100');
+                button.classList.add('bg-white');
+            } else {
+                if (voteState[id] === 'upvote') {
+                    const upvoteButton = document.getElementById(`upvote-${id}`);
+                    const upvoteCount = upvoteButton.querySelector('p');
+                    upvoteCount.textContent = parseInt(upvoteCount.textContent) - 1;
+                    upvoteButton.classList.remove('bg-blue-100');
+                    upvoteButton.classList.add('bg-white');
+                }
+                button.classList.remove('bg-white');
+                countElement.textContent = parseInt(countElement.textContent) + 1;
+                voteState[id] = 'downvote';
+                button.classList.add('bg-red-100');
+            }
+        }
+    };
+
+    // Add event listeners to all upvote and downvote buttons
+    document.querySelectorAll('[id^="upvote-"]').forEach((button) => {
+        const id = button.id.split('-')[1]; // Extract the index from the button ID
+        const countElement = button.querySelector('p');
+        button.addEventListener('click', () => {
+            updateVotes('upvote', button, countElement, id);
+        });
+    });
+
+    document.querySelectorAll('[id^="downvote-"]').forEach((button) => {
+        const id = button.id.split('-')[1]; // Extract the index from the button ID
+        const countElement = button.querySelector('p');
+        button.addEventListener('click', () => {
+            updateVotes('downvote', button, countElement, id);
+        });
+    });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const loginLinks = document.querySelectorAll('a[href="/login"]');
+    loginLinks.forEach(link => {
+        const currentURL = window.location.pathname + window.location.search;
+        if (currentURL.includes('view')) {
+            link.href = `/login?redirect=${encodeURIComponent(currentURL)}`;
+        } else {
+            link.href = '/login';
         }
     });
 });

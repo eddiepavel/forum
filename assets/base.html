@@ -6,17 +6,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Home</title>
   <link href="/assets/output.css" rel="stylesheet">
-  <script src="/assets/app/app.js"></script>
 </head>
 
 <body>
+  {{template "nav" .}}
   {{if eq .Source "home"}}
-    {{template "nav" .}}
     {{template "main" .}}
-  {{else}}
-    {{template "nav" .}}
+  {{end}}
+  {{if eq .Source "create"}}
     {{template "create" .}}
   {{end}}
+  {{if eq .Source "view"}}
+    {{template "view" .}}
+  {{end}}
+  {{if eq .Source "wip"}}
+    {{template "wip" .}}
+  {{end}}
+  <script src="/assets/app/app.js"></script>
 </body>
-
 </html>
