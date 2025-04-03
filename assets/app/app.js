@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const menu = document.getElementById('menu');
     const menuToggle = document.getElementById('menu-toggle');
     const menuUntoggle = document.getElementById('menu-untoggle');
+    const selectedCategories = new Set();
 
     // Close the menu with a transition
     menuUntoggle.addEventListener('click', function () {
@@ -34,43 +35,61 @@ document.addEventListener('DOMContentLoaded', () => {
     dropDownButton.addEventListener('click', toggleDropdown);
     combobox.addEventListener('click', toggleDropdown);
 
+    // Close the dropdown when clicking outside
+    document.addEventListener('click', (event) => {
+        const isClickInside = combobox.contains(event.target) || categoryList.contains(event.target) || dropDownButton.contains(event.target);
+        if (!isClickInside) {
+            categoryList.classList.add('hidden'); // Collapse the dropdown
+        }
+    });
+
     // Add click event listeners to list items
     listItems.forEach((item) => {
         item.addEventListener('click', () => {
             const selectedCategory = item.querySelector('span.block').textContent.trim();
-
-            // Update the combobox input with the selected category
-            combobox.value = selectedCategory;
-
-            // Update the hidden input with the selected category
-            hiddenCategoryInput.value = selectedCategory;
-
-            // Optionally hide the dropdown
-            categoryList.classList.add('hidden');
-
-            // Highlight the selected item
-            listItems.forEach((li) => {
-                const checkIcon = li.querySelector('span[id^="check-"]');
-                if (checkIcon) {
+    
+            // Toggle selection of the category
+            if (selectedCategories.has(selectedCategory)) {
+                selectedCategories.delete(selectedCategory);
+                item.classList.remove('bg-indigo-100'); // Remove highlight
+            } else {
+                selectedCategories.add(selectedCategory);
+                item.classList.add('bg-indigo-100'); // Highlight selected item
+            }
+    
+            // Update the hidden input with selected categories
+            hiddenCategoryInput.value = Array.from(selectedCategories).join(',');
+    
+            // Toggle the purple tick visibility
+            const checkIcon = item.querySelector('span[id^="check-"]');
+            if (checkIcon) {
+                if (selectedCategories.has(selectedCategory)) {
+                    checkIcon.classList.remove('text-white');
+                    checkIcon.classList.add('text-indigo-600'); // Purple tick
+                } else {
                     checkIcon.classList.add('text-white');
                     checkIcon.classList.remove('text-indigo-600');
                 }
-            });
-
-            const checkIcon = item.querySelector('span[id^="check-"]');
-            if (checkIcon) {
-                checkIcon.classList.remove('text-white');
-                checkIcon.classList.add('text-indigo-600');
             }
         });
     });
 
-    // Form submission validation
-    form.addEventListener('submit', (event) => {
-        if (!hiddenCategoryInput.value) {
-            console.log(hiddenCategoryInput.value)
-            event.preventDefault(); // Prevent form submission
-            alert('Please select a category before submitting.');
+    // Filter categories based on combobox input
+    combobox.addEventListener('input', () => {
+        const query = combobox.value.toLowerCase().trim();
+
+        listItems.forEach((item) => {
+            const category = item.querySelector('span.block').textContent.toLowerCase();
+            if (category.includes(query)) {
+                item.classList.remove('hidden');
+            } else {
+                item.classList.add('hidden');
+            }
+        });
+
+        // Show the dropdown if it's hidden
+        if (categoryList.classList.contains('hidden')) {
+            categoryList.classList.remove('hidden');
         }
     });
 
@@ -86,39 +105,39 @@ document.addEventListener('DOMContentLoaded', () => {
             if (voteState[id] === 'upvote') {
                 countElement.textContent = parseInt(countElement.textContent) - 1;
                 voteState[id] = null;
-                button.classList.remove('bg-blue-100');
+                button.classList.remove('bg-blue-300');
                 button.classList.add('bg-white');
             } else {
                 if (voteState[id] === 'downvote') {
                     const downvoteButton = document.getElementById(`downvote-${id}`);
                     const downvoteCount = downvoteButton.querySelector('p');
                     downvoteCount.textContent = parseInt(downvoteCount.textContent) - 1;
-                    downvoteButton.classList.remove('bg-red-100');
+                    downvoteButton.classList.remove('bg-red-200');
                     downvoteButton.classList.add('bg-white');
                 }
                 button.classList.remove('bg-white');
                 countElement.textContent = parseInt(countElement.textContent) + 1;
                 voteState[id] = 'upvote';
-                button.classList.add('bg-blue-100');
+                button.classList.add('bg-blue-300');
             }
         } else if (type === 'downvote') {
             if (voteState[id] === 'downvote') {
                 countElement.textContent = parseInt(countElement.textContent) - 1;
                 voteState[id] = null;
-                button.classList.remove('bg-red-100');
+                button.classList.remove('bg-red-200');
                 button.classList.add('bg-white');
             } else {
                 if (voteState[id] === 'upvote') {
                     const upvoteButton = document.getElementById(`upvote-${id}`);
                     const upvoteCount = upvoteButton.querySelector('p');
                     upvoteCount.textContent = parseInt(upvoteCount.textContent) - 1;
-                    upvoteButton.classList.remove('bg-blue-100');
+                    upvoteButton.classList.remove('bg-blue-300');
                     upvoteButton.classList.add('bg-white');
                 }
                 button.classList.remove('bg-white');
                 countElement.textContent = parseInt(countElement.textContent) + 1;
                 voteState[id] = 'downvote';
-                button.classList.add('bg-red-100');
+                button.classList.add('bg-red-200');
             }
         }
     };

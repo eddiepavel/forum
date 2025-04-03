@@ -4,13 +4,27 @@
 </form>
 <div class="relative flex py-6 justify-center sm:py-6 mx-auto px-6 sm:px-6 lg:px-8">
   <!-- Left Sidebar -->
-    <div class="hidden lg:block lg:w-1/5 bg-gray-50 ml-6 p-4 mt-6 fixed top-[5rem] left-0 h-full z-10">
-    <!-- Add content for the left sidebar here -->
-      <p>Left Sidebar Content</p>
-      <br>
-      <p>Work In Progress</p>
+    <div class="hidden lg:block lg:fixed rounded-lg lg:w-1/5 bg-gray-100 ml-6 p-4 mt-6 fixed top-[5rem] left-0 h-auto z-10">
+      <!-- Add content for the left sidebar here -->
+      <h2 class="px-6 py-2 text-2xl font-semibold text-gray-900">Categories</h2>
+      <div>
+        <ul id="category-list" class="z-10 mt-1 h-full w-full rounded-md py-1 ml-6 text-base sm:text-sm" role="listbox">
+          {{range $index, $category := index .Data "categories"}}
+              <li id="item-{{$index}}" class="relative cursor-default py-2 pr-4 pl-8 text-gray-900 select-none" role="option" tabindex="-1">
+                  <span class="block truncate text-xl">{{$category}}</span>
+                  <span id="check-{{$index}}" class="absolute inset-y-0 left-0 flex items-center pl-1.5 text-white">
+                      <svg class="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
+                          <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
+                      </svg>
+                  </span>
+              </li>
+          {{end}}
+        </ul>
+      </div>
+      <h2 class="px-6 py-2 text-2xl font-semibold text-gray-900">Liked</h2>
+      <h2 class="px-6 py-2 text-2xl font-semibold text-gray-900">Created</h2>
     </div>
-    <div class="flex fixed flex-col px-6 lg:flex-row lg:gap-8 max-w-2xl w-full">
+    <div class="flex z-1 flex-col px-6 lg:flex-row mt-10 py-6 lg:gap-8 max-w-2xl h-auto w-full">
       <div class="items-center mx-auto w-full">
         <h2 class="text-4xl justify-center flex font-semibold tracking-tight text-pretty text-gray-900 sm:text-5xl">
           From the blog

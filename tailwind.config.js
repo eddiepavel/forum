@@ -17,5 +17,7 @@ module.exports = {
       'px-1',
       'size-4',
       'py-1',
+      'text-xl',
+      'text-2xl',
     ],
   };

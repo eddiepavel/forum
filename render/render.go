@@ -62,7 +62,7 @@ func PrepareView(source string, r *http.Request) (View, error) {
 	}
 	data.Source = source
 
-	if source == "create" {
+	if source == "create" || source == "home" {
 		data.Data["categories"] = categories
 	}
 

@@ -58,6 +58,22 @@ var data = []Post{
 		Title:    "Welcome Post",
 		Time:     time.Now().Add(-2 * time.Hour).Format("2006-01-02 15:04:05"),
 	},
+	{
+		ID:       4,
+		Author:   user,
+		Category: "Announcements",
+		Content:  "Welcome to the forum! Feel free to explore and contribute.",
+		Title:    "Welcome Post",
+		Time:     time.Now().Add(-2 * time.Hour).Format("2006-01-02 15:04:05"),
+	},
+	{
+		ID:       10,
+		Author:   user,
+		Category: "Announcements",
+		Content:  "Welcome to the forum! Feel free to explore and contribute.",
+		Title:    "Welcome Post",
+		Time:     time.Now().Add(-2 * time.Hour).Format("2006-01-02 15:04:05"),
+	},
 }
 
 func GetData(source string, r *http.Request) (interface{}, error) {
