@@ -92,7 +92,60 @@ document.addEventListener('DOMContentLoaded', () => {
             categoryList.classList.remove('hidden');
         }
     });
+});
 
+document.addEventListener('DOMContentLoaded', () => {
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const sidebar = document.getElementById('sidebar');
+
+    // Open the menu with a transition
+    sidebarToggle.addEventListener('click', (event) => {
+        sidebar.classList.remove('hidden', 'pointer-events-none', 'invisible'); // Make visible
+        setTimeout(() => {
+            sidebar.classList.remove('-translate-x-full'); // Slide out
+        }, 20); // Slight delay to ensure transition applies
+        event.stopPropagation();
+    });
+
+    // Close the dropdown when clicking outside
+    document.addEventListener('click', (event) => {
+        const isClickInside = sidebar.contains(event.target);
+        if (!isClickInside) {
+            sidebar.classList.add('-translate-x-full'); // Slide out
+            setTimeout(() => {
+                sidebar.classList.add('hidden', 'pointer-events-none', 'invisible'); // Hide after transition
+            }, 200); // Match the transition duration
+        }
+    });
+
+    // Prevent clicks inside the sidebar from closing it
+    sidebar.addEventListener('click', (event) => {
+        event.stopPropagation(); // Prevent the click from propagating to the document
+    });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const categoryToggle = document.getElementById('category-toggle');
+    const categoryContainer = document.getElementById('category-container');
+    const categoryArrow = document.getElementById('category-arrow');
+
+    // Ensure the list is collapsed initially
+    categoryContainer.style.maxHeight = '0px';
+    categoryContainer.style.overflow = 'hidden'; // Ensure content is hidden when collapsed
+    categoryContainer.style.transition = 'max-height 0.3s ease-in-out'; // Add smooth transition
+
+    // Toggle the category list visibility with a smooth transition
+    categoryToggle.addEventListener('click', () => {
+        if (categoryContainer.style.maxHeight === '0px' || !categoryContainer.style.maxHeight) {
+            // Expand the list
+            categoryContainer.style.maxHeight = categoryContainer.scrollHeight + 'px'; // Set to full height
+            categoryArrow.classList.add('rotate-180'); // Rotate the arrow
+        } else {
+            // Collapse the list
+            categoryContainer.style.maxHeight = '0px'; // Collapse to 0 height
+            categoryArrow.classList.remove('rotate-180'); // Reset the arrow rotation
+        }
+    });
 });
 
 document.addEventListener('DOMContentLoaded', () => {
