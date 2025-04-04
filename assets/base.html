@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 
 <head>
   <meta charset="UTF-8">
@@ -7,9 +7,10 @@
   <title>Home</title>
   <link href="/assets/output.css" rel="stylesheet">
 </head>
-
+{{if and (ne .Source "login") (ne .Source "register")}}
 <body>
-  {{template "nav" .}}
+    {{template "nav" .}}
+  {{end}}
   {{if eq .Source "home"}}
     {{template "main" .}}
   {{end}}
@@ -21,6 +22,15 @@
   {{end}}
   {{if eq .Source "wip"}}
     {{template "wip" .}}
+  {{end}}
+  {{if eq .Source "error"}}
+    {{template "error" .}}
+  {{end}}
+  {{if eq .Source "login"}}
+    {{template "login" .}}
+  {{end}}
+  {{if eq .Source "register"}}
+    {{template "register" .}}
   {{end}}
   <script src="/assets/app/app.js"></script>
 </body>

@@ -43,7 +43,7 @@ var data = []Post{
 	{
 		ID:        1,
 		Author:    user,
-		Category:  "General",
+		Category:  []string{"General"},
 		Content:   template.HTML("This is a test post<br>Hello, world!"),
 		Title:     "Test Post",
 		Time:      time.Now().Add(-time.Hour).Format("2006-01-02 15:04:05"),
@@ -53,7 +53,7 @@ var data = []Post{
 	{
 		ID:       2,
 		Author:   user,
-		Category: "Announcements",
+		Category: []string{"Announcements", "General", "Other", "Sports"},
 		Content:  "Welcome to the forum! Feel free to explore and contribute.",
 		Title:    "Welcome Post",
 		Time:     time.Now().Add(-2 * time.Hour).Format("2006-01-02 15:04:05"),
@@ -61,7 +61,7 @@ var data = []Post{
 	{
 		ID:       4,
 		Author:   user,
-		Category: "Announcements",
+		Category: []string{"Announcements", "General"},
 		Content:  "Welcome to the forum! Feel free to explore and contribute.",
 		Title:    "Welcome Post",
 		Time:     time.Now().Add(-2 * time.Hour).Format("2006-01-02 15:04:05"),
@@ -69,7 +69,7 @@ var data = []Post{
 	{
 		ID:       10,
 		Author:   user,
-		Category: "Announcements",
+		Category: []string{"Announcements", "Technology", "General"},
 		Content:  "Welcome to the forum! Feel free to explore and contribute.",
 		Title:    "Welcome Post",
 		Time:     time.Now().Add(-2 * time.Hour).Format("2006-01-02 15:04:05"),

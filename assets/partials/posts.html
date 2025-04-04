@@ -2,10 +2,13 @@
 <div class="mt-8 space-y-12 border-t flex flex-col justify-center border-gray-200 pt-10 sm:mt-8 sm:pt-10">
     {{range $post := index .Data "posts"}}
     <article class="w-full sm:max-w-[450px] flex flex-col items-start justify-between mx-auto">
-        <div class="flex w-full items-center justify-between text-xs">
+        <div class="flex w-full items-center justify-between text-xs flex-wrap gap-y-2">
             <time datetime="2020-03-16" class="text-gray-500">{{$post.Time}}</time>
-            <!-- <a href="?category={{$post.Category}}" class="relative z-5 rounded-full bg-gray-50 px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-100">{{$post.Category}}</a> -->
-            <a href="/wip" class="relative z-5 rounded-full bg-gray-50 px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-100">{{$post.Category}}</a>
+            <div class="flex items-center gap-x-1">
+                {{range $post.Category}}
+                <a href="/wip" class="relative z-5 rounded-full bg-gray-50 px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-100">{{.}}</a>
+                {{end}}
+            </div>
         </div>
         <div class="group relative">
             <h3 class="mt-3 text-lg/6 font-semibold text-gray-900 group-hover:text-gray-600">

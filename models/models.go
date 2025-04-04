@@ -25,7 +25,7 @@ type Session struct {
 type Post struct {
 	ID        int
 	Title     string
-	Category  string
+	Category  []string
 	Content   template.HTML
 	Author    Users
 	Time      string

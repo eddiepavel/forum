@@ -7,11 +7,13 @@
         <div class="flex-auto pt-6 pl-6">
           <div class="font-semibold text-gray-900">{{$post.Title}}</div>
         </div>
-        <div class="flex justify-center self-end px-6">
+        <div class="flex gap-x-1 justify-center self-end px-6">
+          {{range $post.Category}}
           <dt class="sr-only">Category</dt>
-          <a href="/?category={{$post.Category}}">
-            <dd class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset">{{$post.Category}}</dd>
+          <a href="/?category={{.}}">
+            <dd class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset">{{.}}</dd>
           </a>
+          {{end}}
         </div>
         <div class="mt-6 flex items-center w-full flexgap-x-4 border-t border-gray-900/5 px-6 pt-6">
           <dt class="flex justify-center items-center">
@@ -66,10 +68,12 @@
       {{if .User}}
       <label for="comment" class="block text-sm/6 font-medium text-gray-900"></label>
       <div>
-        <form method="post" id="comment-form" action="/wip">
+        <form method="post" id="comment-form" action="/view">
           <input type="hidden" name="post_id" value="{{$post.ID}}">
           <input type="hidden" name="csrf" value="{{index .Session.Data "csrf" }}">
-          <textarea rows="2" name="comment" id="comment" placeholder="Add your comment..." class="block w-full resize-none rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+          <input type="hidden" name="author_id" value="{{.User.ID}}">
+          <input type="hidden" name="redirect" value="/view?id={{$post.ID}}">
+          <textarea rows="2" name="comment" id="comment" required placeholder="Add your comment..." class="block w-full resize-none rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
           <div class="flex mt-2 justify-end">
             <button type="submit" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Post</button>
           </div>

@@ -1,4 +1,4 @@
-package forum
+package auth
 
 import (
 	"fmt"
@@ -22,5 +22,19 @@ func GetView(app *app.Application) http.HandlerFunc {
 			http.Error(w, "Something went wrong", http.StatusInternalServerError)
 			return
 		}
+	}
+}
+
+func PostView(app *app.Application) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		r.ParseForm()
+
+		for key, values := range r.Form {
+			fmt.Printf("Key: %s, Values: %v\n", key, values)
+		}
+
+		redirect := r.FormValue("redirect")
+
+		http.Redirect(w, r, redirect, http.StatusSeeOther)
 	}
 }
