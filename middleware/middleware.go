@@ -11,22 +11,22 @@ type Middleware func(h http.HandlerFunc, app *app.Application) http.HandlerFunc
 func ChainMiddleware(h http.HandlerFunc, k []string, app *app.Application) http.HandlerFunc {
 
 	selectMiddle := map[string]Middleware{
-		"auth":    AuthMiddleware,
-		"headers": CommonHeaders,
-		"logs":    LoggingMiddleware,
-		"session": SessionMiddleware,
-		"csrf":    CsrfTokenMiddlware,
+		"auth":      AuthMiddleware,
+		"headers":   CommonHeaders,
+		"logs":      LoggingMiddleware,
+		"session":   SessionMiddleware,
+		"csrf":      CsrfTokenMiddlware,
+		"ratelimit": RateLimitMiddleware,
 	}
 
-	globalMiddle := []string{"logs", "headers", "csrf", "session"}
+	globalMiddle := []string{"logs", "headers", "csrf", "session", "ratelimit"}
 
 	wrapped := h
 
 	fullMiddlewareList := append(globalMiddle, k...)
 
-	for i := 0 ; i <= len(fullMiddlewareList) - 1 ; i++ {
+	for i := 0; i <= len(fullMiddlewareList)-1; i++ {
 		key := fullMiddlewareList[i]
-		fmt.Println(key)
 		if mw, exists := selectMiddle[key]; exists {
 			wrapped = mw(wrapped, app)
 		} else {

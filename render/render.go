@@ -1,13 +1,11 @@
 package render
 
 import (
-	"fmt"
 	"forum-app/middleware"
 	"forum-app/models"
 	"forum-app/session"
 	"html/template"
 	"net/http"
-	"strings"
 )
 
 var files = []string{
@@ -18,7 +16,6 @@ var files = []string{
 	"./assets/partials/posts.html",
 	"./assets/partials/view.html",
 	"./assets/partials/wip.html",
-	"./assets/partials/error.html",
 	"./assets/partials/login.html",
 	"./assets/partials/register.html"}
 
@@ -53,27 +50,6 @@ func PrepareView(source string, r *http.Request) (View, error) {
 		data = models.PageData{User: user, Session: session}
 	} else {
 		data = models.PageData{User: nil, Session: session}
-	}
-
-	if strings.HasPrefix(source, "error:") {
-		fmt.Println("Error page requested:", source)
-		data.Data = make(map[string]interface{})
-		if source == "error:404" {
-			data.Data["message"] = "Page Not Found"
-		}
-		if source == "error:500" {
-			data.Data["message"] = "Internal Server Error"
-		}
-		if source == "error:403" {
-			data.Data["message"] = "Forbidden"
-		}
-		view := View{
-			Name: source[:6],
-			Data: &data,
-		}
-		data.Source = "error"
-		view.Path = files
-		return view, nil
 	}
 
 	posts, err := models.GetData(source, r)
