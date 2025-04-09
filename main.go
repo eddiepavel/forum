@@ -33,7 +33,7 @@ func main() {
 
 	session := session.NewSessionStore(1*time.Hour, 1*time.Hour)
 
-	rl := ratelimiter.NewRateLimiter(10, 1*time.Hour)
+	rl := ratelimiter.NewRateLimiter(100, 1*time.Minute)
 
 	app := &app.Application{
 		DB:          db,
