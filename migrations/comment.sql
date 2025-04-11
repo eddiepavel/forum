@@ -5,6 +5,7 @@ CREATE TABLE comment (
     post_id INTEGER NOT NULL,
     time DATETIME NOT NULL,
     likes INTEGER DEFAULT 0,
+    dislikes INTEGER DEFAULT 0,
     FOREIGN KEY(author) REFERENCES user(id),
     FOREIGN KEY(post_id) REFERENCES post(id)
 );

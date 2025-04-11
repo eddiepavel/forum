@@ -6,6 +6,7 @@ CREATE TABLE post (
     author INTEGER NOT NULL, 
     time DATETIME NOT NULL,
     likes INTEGER DEFAULT 0,
+    dislikes INTEGER DEFAULT 0,
     FOREIGN KEY(author) REFERENCES user(id)
 );
 
