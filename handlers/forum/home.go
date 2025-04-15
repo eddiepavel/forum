@@ -34,6 +34,7 @@ func GetRedirect(app *app.Application) http.HandlerFunc {
 		}
 
 		if r.URL.Path == "/favicon.ico" {
+			w.WriteHeader(http.StatusNoContent)
 			return
 		}
 

@@ -6,7 +6,6 @@ import (
 	"forum-app/render"
 
 	"forum-app/helpers"
-	"forum-app/helpers/flash"
 	"forum-app/helpers/validator"
 	"net/http"
 )
@@ -43,21 +42,27 @@ func PostLogin(app *app.Application) http.HandlerFunc {
 		valid, errors := validator.ValidateRequest(r, inputs)
 
 		if !valid {
-			flash.HandleMessages(w, r, errors, r.Header.Get("Referer"), "error")
+			cookie, err := r.Cookie("session")
+			if err != nil {
+				http.Error(w, "Session cookie not found", http.StatusUnauthorized)
+				return
+			}
+			session, _ := app.Session.GetSession(cookie.Value)
+			session.SetFlash("error", errors)
+			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
 
 		user, err := app.DB.GetUserByEmail(r.FormValue("email"))
-
-		if err != nil {
-			flash.HandleMessages(w, r, map[string]string{"user": "Credentials don't match our records"}, r.Header.Get("Referer"), "error")
-			return
-		}
-
-		err = helpers.CompareHashAndPassword(user.Password, r.FormValue("password"))
-
-		if err != nil {
-			flash.HandleMessages(w, r, map[string]string{"user": "Credentials don't match our records"}, r.Header.Get("Referer"), "error")
+		if err != nil || helpers.CompareHashAndPassword(user.Password, r.FormValue("password")) != nil {
+			cookie, err := r.Cookie("session")
+			if err != nil {
+				http.Error(w, "Session cookie not found", http.StatusUnauthorized)
+				return
+			}
+			session, _ := app.Session.GetSession(cookie.Value)
+			session.SetFlash("error", "Invalid email or password.")
+			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
 

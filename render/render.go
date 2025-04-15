@@ -52,12 +52,22 @@ func PrepareView(source string, r *http.Request) (View, error) {
 		data = models.PageData{User: nil, Session: session}
 	}
 
+	data.Data = make(map[string]interface{})
+
+	if session.Data == nil {
+		session.Data = make(map[string]interface{})
+	}
+
+	// Retrieve flash messages
+	if flash, exists := session.GetFlash("error"); exists {
+		data.Data["error"] = flash
+	}
+
 	posts, err := models.GetData(source, r)
 	if err != nil {
 		return View{}, err
 	}
 
-	data.Data = make(map[string]interface{})
 	if source == "home" {
 		data.Data["posts"] = posts
 	} else if source == "view" {

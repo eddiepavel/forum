@@ -25,7 +25,7 @@
       </button>
     </h2>
     <div id="category-container" class="overflow-hidden">
-      <ul id="category-list" class="z-10 mt-1 w-full rounded-md py-1 ml-6 text-base sm:text-sm" role="listbox">
+      <ul id="filter-list" class="z-10 mt-1 w-full rounded-md py-1 ml-6 text-base sm:text-sm" role="listbox">
           {{range $index, $category := index .Data "categories"}}
               <li id="item-{{$index}}" class="relative cursor-default py-2 pr-4 pl-8 text-gray-900 select-none" role="option" tabindex="-1">
                   <span class="block truncate text-xl">{{$category}}</span>

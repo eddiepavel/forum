@@ -118,11 +118,17 @@ func generateSessionID() string {
 
 // SetFlash stores a flash message under the given key.
 func (sess *Session) SetFlash(key string, value interface{}) {
+	if sess.Data == nil {
+		sess.Data = make(map[string]interface{})
+	}
 	sess.Data[key] = value
 }
 
 // GetFlash retrieves and removes a flash message from the session.
 func (sess *Session) GetFlash(key string) (interface{}, bool) {
+	if sess.Data == nil {
+		return nil, false
+	}
 	val, exists := sess.Data[key]
 	if exists {
 		// Remove after reading
