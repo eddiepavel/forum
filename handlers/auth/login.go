@@ -10,19 +10,21 @@ import (
 	"net/http"
 )
 
-func GetLogin(w http.ResponseWriter, r *http.Request) {
-	view, err := render.PrepareView("login", r)
-	if err != nil {
-		fmt.Println(err)
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
-		return
-	}
+func GetLogin(app *app.Application) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		view, err := render.PrepareView("login", r, app)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(w, "Something went wrong", http.StatusInternalServerError)
+			return
+		}
 
-	err = view.Render(w, r)
-	if err != nil {
-		fmt.Println(err)
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
-		return
+		err = view.Render(w, r)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(w, "Something went wrong", http.StatusInternalServerError)
+			return
+		}
 	}
 }
 

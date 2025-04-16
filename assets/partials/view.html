@@ -8,7 +8,7 @@
           <div class="font-semibold text-gray-900">{{$post.Title}}</div>
         </div>
         <div class="flex gap-x-1 justify-center self-end px-6">
-          {{range $post.Category}}
+          {{range $post.Categories}}
           <dt class="sr-only">Category</dt>
           <a href="/?category={{.}}">
             <dd class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset">{{.}}</dd>

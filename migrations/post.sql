@@ -1,7 +1,7 @@
 CREATE TABLE post (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL UNIQUE,
-    category TEXT NOT NULL,
+    categories TEXT NOT NULL,
     content VARCHAR(255),
     author INTEGER NOT NULL, 
     time DATETIME NOT NULL,

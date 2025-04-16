@@ -10,7 +10,7 @@ import (
 
 func GetHome(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		view, err := render.PrepareView("home", r)
+		view, err := render.PrepareView("home", r, app)
 		if err != nil {
 			fmt.Println(err)
 			http.Error(w, "Something went wrong", http.StatusInternalServerError)

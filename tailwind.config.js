@@ -23,5 +23,7 @@ module.exports = {
       'pr-2',
       'gap-x-2',
       'gap-x-1',
+      'justify-end',
+      'mr-2',
     ],
   };

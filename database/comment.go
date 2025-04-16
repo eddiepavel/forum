@@ -1,13 +1,13 @@
 package database
 
 import (
-	"forum-app/utils"
+	"forum-app/helpers"
 	"time"
 )
 
-func (db *Connection) SetComment(postID int, content, author string) error {
+func (db *Connection) SetComment(postID, content, author string) error {
 	// Sanitize comment
-	cleanContent, err := utils.SanitizeComment(content)
+	cleanContent, err := helpers.SanitizeComment(content)
 	if err != nil {
 		return err
 	}

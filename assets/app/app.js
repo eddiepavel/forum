@@ -43,11 +43,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    form.addEventListener('submit', (event) => {
+        console.log(selectedCategories.size);
+        // Check the number of selected categories
+        if (selectedCategories.size === 0 || selectedCategories.size > 4) {
+            alert("You must select between 1 and 4 categories.");
+            event.preventDefault(); // Prevent form submission
+        }
+    });
+
     // Add click event listeners to list items
     listItems.forEach((item) => {
         item.addEventListener('click', () => {
             const selectedCategory = item.querySelector('span.block').textContent.trim();
-    
+
             // Toggle selection of the category
             if (selectedCategories.has(selectedCategory)) {
                 selectedCategories.delete(selectedCategory);
@@ -205,6 +214,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const url = new URL(window.location.href);
         url.searchParams.set('category', 'Created');
         window.location.href = url.toString();
+    });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const resetFilterButton = document.getElementById('reset-filter');
+
+    // Check if the URL has a "category" query parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('category')) {
+        resetFilterButton.classList.remove('hidden'); // Show the button
+    }
+
+    // Add click event listener to reset the filter
+    resetFilterButton.addEventListener('click', () => {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('category'); // Remove the "category" query parameter
+        resetFilterButton.classList.add('hidden'); // Hide the button
+        window.location.href = url.toString(); // Redirect to the updated URL
     });
 });
 
