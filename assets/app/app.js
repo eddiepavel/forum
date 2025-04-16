@@ -44,10 +44,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     form.addEventListener('submit', (event) => {
-        console.log(selectedCategories.size);
         // Check the number of selected categories
-        if (selectedCategories.size === 0 || selectedCategories.size > 4) {
-            alert("You must select between 1 and 4 categories.");
+        if (selectedCategories.size === 0) {
+            selectedCategories.add('General');
+            hiddenCategoryInput.value = Array.from(selectedCategories);
+        }
+
+        if (selectedCategories.size > 4) {
+            alert("You can select up to 4 categories.");
             event.preventDefault(); // Prevent form submission
         }
     });
