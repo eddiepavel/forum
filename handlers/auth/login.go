@@ -41,7 +41,7 @@ func PostLogin(app *app.Application) http.HandlerFunc {
 			"password": {"required", "string"},
 		}
 
-		valid, errors := validator.ValidateRequest(r, inputs)
+		valid, errors := validator.ValidateRequest(r, inputs, app)
 
 		if !valid {
 			cookie, err := r.Cookie("session")

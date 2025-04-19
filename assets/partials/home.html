@@ -1,4 +1,4 @@
-{{define "main"}}
+{{define "home"}}
 <form id="home">
     <input type="hidden" id="csrf" value="{{index .Session.Data "csrf" }}">
 </form>
@@ -48,9 +48,9 @@
     </button>
   </div>
   </div>
-    <div class="flex z-1 flex-col px-3 lg:flex-row mt-10 py-6 lg:gap-8 max-w-2xl h-auto w-full">
+    <div class="flex z-1 flex-col px-3 lg:flex-row mt-10 py-6 lg:gap-8 max-w-4xl h-auto w-full">
       <div class="items-center mx-auto w-full">
-        <h2 class="text-4xl justify-center flex font-semibold tracking-tight text-pretty text-gray-900 sm:text-5xl">
+        <h2 class="text-4xl justify-center mt-6 flex font-semibold tracking-tight text-pretty text-gray-900 sm:text-5xl">
           From the blog
         </h2>
         <p class="mt-2 py-2 text-xs lg:text-xl flex justify-center text-gray-600">
@@ -65,5 +65,32 @@
         {{end}}
       </div>
     </div>
-</div>
+  </div>
+  {{if index .Data "posts"}}
+    <nav class="flex mx-auto items-center max-w-4xl justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6" aria-label="Pagination">
+      <div class="block">
+        <p class="text-sm text-gray-700">
+          Showing
+          <span class="font-medium">{{index .Data "fromPosts"}}</span>
+          to
+          <span class="font-medium">{{index .Data "toPosts"}}</span>
+          of
+          <span class="font-medium">{{index .Data "totalPosts"}}</span>
+          results
+        </p>
+      </div>
+      {{if ne (index .Data "toPosts") (index .Data "totalPosts")}}
+        <div class="flex flex-1 justify-between sm:justify-end">
+          {{if ne (index .Data "fromPosts") 1}}
+            <button id="pagePrev" class="relative inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus-visible:outline-offset-0">Previous</button>
+          {{end}}
+          <button id="pageNext" class="relative ml-3 inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus-visible:outline-offset-0">Next</button>
+        </div>
+      {{else}}
+        {{if ne (index .Data "fromPosts") 1}}
+          <button id="pagePrev" class="relative inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus-visible:outline-offset-0">Previous</button>
+        {{end}}
+      {{end}}
+    </nav>
+  {{end}}
 {{end}}

@@ -1,6 +1,6 @@
 CREATE TABLE comment (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    content VARCHAR(255) NOT NULL,
+    content LONGTEXT NOT NULL,
     author INTEGER NOT NULL,
     post_id INTEGER NOT NULL,
     time DATETIME NOT NULL,

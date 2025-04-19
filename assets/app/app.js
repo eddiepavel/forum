@@ -108,6 +108,39 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+    const pagePrev = document.getElementById('pagePrev');
+    const pageNext = document.getElementById('pageNext');
+
+    const updatePageQuery = (increment) => {
+        const url = new URL(window.location.href);
+        const currentPage = parseInt(url.searchParams.get('page')) || 1; // Default to page 1 if not present
+        const newPage = currentPage + increment;
+
+        if (newPage < 1) return; // Prevent negative or zero pages
+
+        // Update the page query parameter
+        url.searchParams.set('page', newPage);
+
+        // Redirect to the updated URL
+        window.location.href = url.toString();
+    };
+
+    if (pagePrev) {
+        pagePrev.addEventListener('click', (event) => {
+            event.preventDefault(); // Prevent default link behavior
+            updatePageQuery(-1); // Decrement the page
+        });
+    }
+
+    if (pageNext) {
+        pageNext.addEventListener('click', (event) => {
+            event.preventDefault(); // Prevent default link behavior
+            updatePageQuery(1); // Increment the page
+        });
+    }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
     const sidebarToggle = document.getElementById('sidebar-toggle');
     const sidebar = document.getElementById('sidebar');
 
@@ -235,6 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const url = new URL(window.location.href);
         url.searchParams.delete('category'); // Remove the "category" query parameter
         resetFilterButton.classList.add('hidden'); // Hide the button
+        url.searchParams.delete('page'); // Remove the "page" query parameter
         window.location.href = url.toString(); // Redirect to the updated URL
     });
 });

@@ -25,5 +25,7 @@ module.exports = {
       'gap-x-1',
       'justify-end',
       'mr-2',
+      'bg-gray-100',
+      'max-w-4xl',
     ],
   };

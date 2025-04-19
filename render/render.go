@@ -44,63 +44,34 @@ func (view *View) Render(w http.ResponseWriter, r *http.Request) error {
 }
 
 func PrepareView(source string, r *http.Request, app *app.Application) (View, error) {
-	user, ok := r.Context().Value(middleware.UserKey).(*models.Users)
-	session := r.Context().Value("user_session").(*session.Session)
-	redirect := r.URL.Query().Get("redirect")
+	user, session := getUserAndSession(r)
+	data := initializePageData(user, session)
 
-	data := models.PageData{}
-	if ok && user != nil {
-		data = models.PageData{User: user, Session: session}
-	} else {
-		data = models.PageData{User: nil, Session: session}
-	}
+	handleFlashMessages(session, &data)
 
-	data.Data = make(map[string]interface{})
-
-	if session.Data == nil {
-		session.Data = make(map[string]interface{})
-	}
-
-	// Retrieve flash messages
-	if flash, exists := session.GetFlash("error"); exists {
-		data.Data["error"] = flash
-	}
-
-	if source == "home" {
-		posts, err := app.DB.GetPostsForHome(1, r.URL.Query().Get("category"), user)
-		if err != nil {
+	switch source {
+	case "home":
+		if err := handleHomePage(r, app, user, &data); err != nil {
 			return View{}, err
 		}
-		data.Data["posts"] = posts
-	}
-
-	if source == "view" {
-		postID := r.URL.Query().Get("id")
-		id, err := strconv.Atoi(postID)
-		if err != nil {
-			return View{}, fmt.Errorf("invalid post ID: %v", err)
-		}
-		if postID == "" {
-			return View{}, fmt.Errorf("post ID is required")
-		}
-		post, err := app.DB.GetPostByID(id)
-		if err != nil {
+	case "view":
+		if err := handleViewPage(r, app, &data); err != nil {
 			return View{}, err
 		}
-		data.Data["post"] = post
+	}
+
+	if source == "create" || source == "home" {
+		setCategories(&data)
 	}
 
 	data.Source = source
-
-	if source == "create" || source == "home" {
-		data.Data["categories"] = categories
-	}
 
 	view := View{
 		Name: source,
 		Data: &data,
 	}
 
+	redirect := r.URL.Query().Get("redirect")
 	if redirect != "" {
 		data.Redirect = redirect
 	}
@@ -108,4 +79,84 @@ func PrepareView(source string, r *http.Request, app *app.Application) (View, er
 	view.Path = files
 
 	return view, nil
+}
+
+func getUserAndSession(r *http.Request) (*models.Users, *session.Session) {
+	user, _ := r.Context().Value(middleware.UserKey).(*models.Users)
+	session := r.Context().Value("user_session").(*session.Session)
+	if session.Data == nil {
+		session.Data = make(map[string]interface{})
+	}
+	return user, session
+}
+
+func initializePageData(user *models.Users, session *session.Session) models.PageData {
+	if user != nil {
+		return models.PageData{User: user, Session: session, Data: make(map[string]interface{})}
+	}
+	return models.PageData{User: nil, Session: session, Data: make(map[string]interface{})}
+}
+
+func handleFlashMessages(session *session.Session, data *models.PageData) {
+	if flash, exists := session.GetFlash("error"); exists {
+		data.Data["error"] = flash
+	}
+}
+
+func handleHomePage(r *http.Request, app *app.Application, user *models.Users, data *models.PageData) error {
+	page := r.URL.Query().Get("page")
+	if page == "" {
+		page = "1"
+	}
+	pageNum, err := strconv.Atoi(page)
+	if err != nil {
+		return fmt.Errorf("invalid page number: %v", err)
+	}
+
+	totalPosts, err := app.DB.GetTotalPostCount(r.URL.Query().Get("category"), user)
+	if err != nil {
+		return err
+	}
+
+	const pageSize = 10
+	totalPages := (totalPosts + pageSize - 1) / pageSize
+	if (pageNum > totalPages || pageNum < 1) && totalPosts != 0 {
+		return fmt.Errorf("Couldn't find page %d", pageNum)
+	}
+
+	if totalPosts == 0 {
+		data.Data["posts"] = nil
+	} else {
+		posts, err := app.DB.GetPostsForHome(pageNum, r.URL.Query().Get("category"), user)
+		if err != nil {
+			return err
+		}
+		data.Data["posts"] = posts
+		data.Data["totalPosts"] = totalPosts
+		data.Data["fromPosts"] = 1 + ((pageNum - 1) * pageSize)
+		data.Data["toPosts"] = len(posts) + ((pageNum - 1) * pageSize)
+	}
+	return nil
+}
+
+func handleViewPage(r *http.Request, app *app.Application, data *models.PageData) error {
+	postID := r.URL.Query().Get("id")
+	if postID == "" {
+		return fmt.Errorf("post ID is required")
+	}
+	id, err := strconv.Atoi(postID)
+	if err != nil {
+		return fmt.Errorf("invalid post ID: %v", err)
+	}
+
+	post, err := app.DB.GetPostByID(id)
+	if err != nil {
+		return err
+	}
+	data.Data["post"] = post
+	return nil
+}
+
+func setCategories(data *models.PageData) {
+	data.Data["categories"] = categories
 }

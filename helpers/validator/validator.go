@@ -2,20 +2,21 @@ package validator
 
 import (
 	"errors"
+	"fmt"
+	"forum-app/app"
 	"net/http"
 	"net/mail"
 	"strconv"
 	"strings"
 )
 
-
-type Validator struct{}
-
-
-func NewValidator() *Validator {
-	return &Validator{}
+type Validator struct {
+	app *app.Application
 }
 
+func NewValidator(app *app.Application) *Validator {
+	return &Validator{app: app}
+}
 
 func (v *Validator) ValidateString(value interface{}, key string) error {
 	_, ok := value.(string)
@@ -24,7 +25,6 @@ func (v *Validator) ValidateString(value interface{}, key string) error {
 	}
 	return nil
 }
-
 
 func (v *Validator) ValidateInt(value interface{}, key string) error {
 	switch v := value.(type) {
@@ -37,7 +37,6 @@ func (v *Validator) ValidateInt(value interface{}, key string) error {
 	}
 	return errors.New(key + " value is not a valid integer")
 }
-
 
 func (v *Validator) ValidateEmail(value interface{}) error {
 	str, ok := value.(string)
@@ -57,7 +56,6 @@ func (v *Validator) Required(value interface{}, key string) error {
 	}
 	return nil
 }
-
 
 func (v *Validator) ValidateInput(value interface{}, rules []interface{}, key string, hold map[string]interface{}) error {
 	for _, rule := range rules {
@@ -80,10 +78,25 @@ func (v *Validator) ValidateInput(value interface{}, rules []interface{}, key st
 				if err := v.Required(value, key); err != nil {
 					return err
 				}
+			case rule == "sometimes":
+				// Skip validation if the field is not present
+				if value == "" {
+					return nil
+				}
 			case strings.HasPrefix(rule, "same:"):
 				otherkey := strings.TrimPrefix(rule, "same:")
 				if value != hold[otherkey] {
 					return errors.New(key + " must match " + otherkey)
+				}
+			case strings.HasPrefix(rule, "exists:"):
+				// Parse the table and column from the rule
+				parts := strings.Split(strings.TrimPrefix(rule, "exists:"), ",")
+				if len(parts) != 2 {
+					return errors.New("invalid exists rule format, expected 'exists:table,column'")
+				}
+				table, column := parts[0], parts[1]
+				if err := v.Exists(value, table, column); err != nil {
+					return err
 				}
 			default:
 				return errors.New("unknown validation rule: " + rule)
@@ -99,11 +112,27 @@ func (v *Validator) ValidateInput(value interface{}, rules []interface{}, key st
 	return nil
 }
 
+// Exists checks if a value exists in the specified table and column
+func (v *Validator) Exists(value interface{}, table, column string) error {
+	if v.app == nil || v.app.DB == nil || v.app.DB.DB == nil {
+		return errors.New("database connection is not available")
+	}
+	query := fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE %s = ?", table, column)
+	var count int
+	err := v.app.DB.DB.QueryRow(query, value).Scan(&count)
+	if err != nil {
+		return errors.New("database error: " + err.Error())
+	}
+	if count == 0 {
+		return errors.New(fmt.Sprintf("value '%v' does not exist in %s.%s", value, table, column))
+	}
+	return nil
+}
 
-func ValidateRequest(r *http.Request, inputs map[string][]interface{}) (bool, map[string]string) {
+func ValidateRequest(r *http.Request, inputs map[string][]interface{}, app *app.Application) (bool, map[string]string) {
 	r.ParseForm()
 
-	v := NewValidator()
+	v := NewValidator(app)
 	errors := make(map[string]string)
 
 	hold := make(map[string]interface{})

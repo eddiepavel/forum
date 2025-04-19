@@ -12,8 +12,13 @@ func GetHome(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		view, err := render.PrepareView("home", r, app)
 		if err != nil {
-			fmt.Println(err)
-			http.Error(w, "Something went wrong", http.StatusInternalServerError)
+			data := err.Error()
+			tmpl, err := template.ParseFiles("./assets/error.html")
+			if err != nil {
+				http.Error(w, "Something went wrong", http.StatusInternalServerError)
+				return
+			}
+			tmpl.Execute(w, data)
 			return
 		}
 

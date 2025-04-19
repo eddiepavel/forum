@@ -2,7 +2,7 @@ CREATE TABLE post (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL UNIQUE,
     categories TEXT NOT NULL,
-    content VARCHAR(255),
+    content LONGTEXT NOT NULL,
     author INTEGER NOT NULL, 
     time DATETIME NOT NULL,
     upvotes INTEGER DEFAULT 0,

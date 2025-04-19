@@ -1,7 +1,6 @@
 package database
 
 import (
-	"fmt"
 	"forum-app/helpers"
 	"forum-app/models"
 
@@ -23,17 +22,50 @@ func (db *Connection) SetPost(title, content, author, categories string) error {
 	return err
 }
 
+func (db *Connection) GetTotalPostCount(filter string, user *models.Users) (int, error) {
+	query := `SELECT COUNT(*) FROM post`
+	var args []interface{}
+
+	// Apply filter if provided
+	if filter != "" {
+		if filter == "Created" {
+			query += ` WHERE author = ?`
+			args = append(args, user.ID)
+		} else {
+			query += ` WHERE categories LIKE ?`
+			args = append(args, "%"+filter+"%")
+		}
+	}
+
+	var count int
+	err := db.DB.QueryRow(query, args...).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}
+
 func (db *Connection) GetPostsForHome(page int, filter string, user *models.Users) ([]models.Post, error) {
 	const pageSize = 10
 	offset := (page - 1) * pageSize
-
+	var args []interface{}
 	query := `SELECT p.id, p.title, p.categories, p.content, p.author, p.time, p.upvotes, p.downvotes 
               FROM post p 
-              JOIN user u ON p.author = u.id 
-              ORDER BY p.time DESC
-              LIMIT ? OFFSET ?`
+              JOIN user u ON p.author = u.id`
+	if filter != "" && filter != "Created" && filter != "Liked" {
+		query += ` WHERE p.categories LIKE ?`
+		args = append(args, "%"+filter+"%")
+	}
+	if filter == "Created" {
+		query += ` WHERE p.author = ?`
+		args = append(args, user.ID)
+	}
+	query += ` ORDER BY p.time DESC 
+			  LIMIT ? OFFSET ?`
+	args = append(args, pageSize, offset)
 
-	rows, err := db.DB.Query(query, pageSize, offset)
+	rows, err := db.DB.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -54,16 +86,6 @@ func (db *Connection) GetPostsForHome(page int, filter string, user *models.User
 			&post.Upvotes,
 			&post.Downvotes,
 		)
-		if filter != "" {
-			fmt.Println("Filter:", filter)
-			if filter == "Created" {
-				if user_id != user.ID {
-					continue
-				}
-			} else if !strings.Contains(categories, filter) {
-				continue
-			}
-		}
 		if err != nil {
 			return nil, err
 		}

@@ -41,7 +41,7 @@ func StoreRegister(app *app.Application) http.HandlerFunc {
 			"confirm_password": {"required", "string", "same:password"},
 		}
 
-		valid, errors := validator.ValidateRequest(r, inputs)
+		valid, errors := validator.ValidateRequest(r, inputs, app)
 
 		if !valid {
 			cookie, err := r.Cookie("session")

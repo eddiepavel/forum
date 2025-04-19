@@ -46,6 +46,6 @@ func (db *Connection) GetUserById(id int) (models.Users, error) {
 	var user models.Users
 
 	err := db.DB.QueryRow(query, id).Scan(&user.ID, &user.Email, &user.Username, &user.Password, &user.Is_Admin, &user.CreatedAt)
-
+	user.Password = ""
 	return user, err
 }

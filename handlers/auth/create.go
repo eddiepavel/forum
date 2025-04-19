@@ -3,6 +3,7 @@ package auth
 import (
 	"fmt"
 	"forum-app/app"
+	"forum-app/helpers/validator"
 	"forum-app/render"
 	"net/http"
 )
@@ -40,16 +41,38 @@ func PostCreate(app *app.Application) http.HandlerFunc {
 			return
 		}
 
+		// Define validation rules
+		inputs := map[string][]interface{}{
+			"title":       {"required", "string"},
+			"description": {"required", "string"},
+			"categories":  {"sometimes", "string"},
+			"user_id":     {"required", "exists:user,id", "string"},
+		}
+
+		// Validate the request
+		valid, errors := validator.ValidateRequest(r, inputs, app)
+		if !valid {
+			http.Error(w, fmt.Sprintf("Validation errors: %v", errors), http.StatusBadRequest)
+			return
+		}
+
+		// Extract validated form values
 		title := r.FormValue("title")
 		content := r.FormValue("description")
 		categories := r.FormValue("categories")
 		author := r.FormValue("user_id")
 
+		if categories == "" {
+			categories = "General"
+		}
+
+		// Save the post to the database
 		err = app.DB.SetPost(title, content, author, categories)
 		if err != nil {
 			http.Error(w, "Unable to create post", http.StatusInternalServerError)
 			return
 		}
+
 		// Redirect to the home page
 		http.Redirect(w, r, "/home", http.StatusSeeOther)
 	}
