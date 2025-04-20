@@ -1,6 +1,6 @@
 {{define "view"}}
 {{$post := index .Data "post"}}
-<div class="items-center w-full pt-[6rem] h-auto flex justify-center">
+<div class="items-center w-full pt-[6rem] mt-2 h-auto flex justify-center">
     <h2 class="sr-only">Summary</h2>
     <div class="justify-center rounded-lg bg-gray-50 ring-1 shadow-xs w-4/5 ring-gray-900/5">
       <dl class="flex flex-wrap">
@@ -13,6 +13,11 @@
           <a href="/?category={{.}}">
             <dd class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset">{{.}}</dd>
           </a>
+          {{end}}
+          {{if eq .User.ID $post.Author.ID}}
+          <button id="delete-post" class="z-10 px-2 py-1 shadow-lg bg-gradient-to-r from-red-300 via-red-400 to-red-500 text-xs rounded-md hover:bg-red-600 transition">
+            Delete
+          </button>
           {{end}}
         </div>
         <div class="mt-6 flex items-center w-full flexgap-x-4 border-t border-gray-900/5 px-6 pt-6">
@@ -41,19 +46,19 @@
         </form>
         {{end}}
         <span class="isolate inline-flex rounded-md shadow-xs">
-            <button {{if .User}} id="upvote-01" {{end}} type="button" class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset bg-white focus:z-10" >
+            <button {{if .User}} id="upvote-post-{{$post.ID}}" data-vote-state="{{$post.UserVote}}" {{end}} type="button" class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset focus:z-10" >
               <span class="sr-only">Upvote</span>
               <svg class="size-5 transform rotate-90" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
                 <path fill-rule="evenodd" d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd" />
               </svg>
-              <p class="text-xs px-2 font-semibold text-gray-500">{{$post.Upvotes}}</p>
+              <span class="vote-count text-xs px-1 font-semibold text-gray-500">{{$post.Upvotes}}</span>
             </button>
-            <button type="button" {{if .User}} id="downvote-01" {{end}} class="relative -ml-px inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset bg-white focus:z-10">
+            <button type="button" {{if .User}} id="downvote-post-{{$post.ID}}" data-vote-state="{{$post.UserVote}}" {{end}} class="relative -ml-px inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset focus:z-10">
               <span class="sr-only">Downvote</span>
               <svg class="size-5 transform rotate-90" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
                 <path fill-rule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
               </svg>
-              <p class="text-xs px-2 font-semibold text-gray-500">{{$post.Downvotes}}</p>
+              <span class="vote-count text-xs px-1 font-semibold text-gray-500">{{$post.Downvotes}}</span>
             </button>
           </span>    
         {{if not .User}}
@@ -70,7 +75,7 @@
       <div>
         <form method="post" id="comment-form" action="/view">
           <input type="hidden" name="post_id" value="{{$post.ID}}">
-          <input type="hidden" name="csrf" value="{{index .Session.Data "csrf" }}">
+          <input id="csrf" type="hidden" name="csrf" value="{{index .Session.Data "csrf" }}">
           <input type="hidden" name="author_id" value="{{.User.ID}}">
           <input type="hidden" name="redirect" value="/view?id={{$post.ID}}">
           <textarea rows="2" name="comment" id="comment" required placeholder="Add your comment..." class="block w-full resize-none rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
@@ -111,19 +116,19 @@
         {{end}}
         <div class="px-2">
           <span class="isolate px-6 inline-flex rounded-md">
-            <button {{if $.User}} id="upvote-{{$index}}" {{end}} type="button" class="relative inline-flex items-center rounded-l-md px-1 py-1 text-gray-400 ring-1 ring-gray-300 ring-inset bg-white focus:z-10" >
+            <button {{if $.User}} id="upvote-comment-{{$comment.ID}}" data-vote-state="{{$comment.UserVote}}" {{end}} type="button" class="relative inline-flex items-center rounded-l-md px-1 py-1 text-gray-400 ring-1 ring-gray-300 ring-inset focus:z-10" >
               <span class="sr-only">Upvote</span>
               <svg class="size-4 transform rotate-90" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
                 <path fill-rule="evenodd" d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd" />
               </svg>
-              <p class="text-xs px-1 font-semibold text-gray-500">{{$comment.Upvotes}}</p>
+              <span class="vote-count text-xs px-1 font-semibold text-gray-500">{{$comment.Upvotes}}</span>
             </button>
-            <button type="button" {{if $.User}} id="downvote-{{$index}}" {{end}} class="relative -ml-px inline-flex items-center rounded-r-md px-1 py-1 text-gray-400 ring-1 ring-gray-300 ring-inset bg-white focus:z-10">
+            <button type="button" {{if $.User}} id="downvote-comment-{{$comment.ID}}" data-vote-state="{{$comment.UserVote}}" {{end}} class="relative -ml-px inline-flex items-center rounded-r-md px-1 py-1 text-gray-400 ring-1 ring-gray-300 ring-inset focus:z-10">
               <span class="sr-only">Downvote</span>
               <svg class="size-4 transform rotate-90" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
                 <path fill-rule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
               </svg>
-              <p class="text-xs px-1 font-semibold text-gray-500">{{$comment.Downvotes}}</p>
+              <span class="vote-count text-xs px-1 font-semibold text-gray-500">{{$comment.Downvotes}}</span>
             </button>
           </span> 
         </div>  

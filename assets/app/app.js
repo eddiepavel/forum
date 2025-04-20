@@ -202,6 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 document.addEventListener('DOMContentLoaded', () => {
     const categoryToggle = document.getElementById('category-toggle');
+    const categoryToggleRow = document.querySelector('h2'); // Select the entire row (h2 tag)
     const categoryContainer = document.getElementById('category-container');
     const categoryArrow = document.getElementById('category-arrow');
 
@@ -211,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
     categoryContainer.style.transition = 'max-height 0.3s ease-in-out'; // Add smooth transition
 
     // Toggle the category list visibility with a smooth transition
-    categoryToggle.addEventListener('click', () => {
+    const toggleDropdown = () => {
         if (categoryContainer.style.maxHeight === '0px' || !categoryContainer.style.maxHeight) {
             // Expand the list
             categoryContainer.style.maxHeight = categoryContainer.scrollHeight + 'px'; // Set to full height
@@ -221,6 +222,17 @@ document.addEventListener('DOMContentLoaded', () => {
             categoryContainer.style.maxHeight = '0px'; // Collapse to 0 height
             categoryArrow.classList.remove('rotate-180'); // Reset the arrow rotation
         }
+    };
+
+    // Add event listener to the button
+    categoryToggle.addEventListener('click', (event) => {
+        event.stopPropagation(); // Prevent the event from propagating to the parent <h2>
+        toggleDropdown();
+    });
+
+    // Add event listener to the entire row
+    categoryToggleRow.addEventListener('click', () => {
+        toggleDropdown();
     });
 });
 
@@ -274,66 +286,74 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-    let voteState = {}; // Tracks the current vote state for each post/comment by ID
-
-    const updateVotes = (type, button, countElement, id) => {
-        if (!voteState[id]) voteState[id] = null; // Initialize vote state for this ID
-
-        if (type === 'upvote') {
-            if (voteState[id] === 'upvote') {
-                countElement.textContent = parseInt(countElement.textContent) - 1;
-                voteState[id] = null;
-                button.classList.remove('bg-blue-300');
-                button.classList.add('bg-white');
-            } else {
-                if (voteState[id] === 'downvote') {
-                    const downvoteButton = document.getElementById(`downvote-${id}`);
-                    const downvoteCount = downvoteButton.querySelector('p');
-                    downvoteCount.textContent = parseInt(downvoteCount.textContent) - 1;
-                    downvoteButton.classList.remove('bg-red-200');
-                    downvoteButton.classList.add('bg-white');
-                }
-                button.classList.remove('bg-white');
-                countElement.textContent = parseInt(countElement.textContent) + 1;
-                voteState[id] = 'upvote';
-                button.classList.add('bg-blue-300');
-            }
-        } else if (type === 'downvote') {
-            if (voteState[id] === 'downvote') {
-                countElement.textContent = parseInt(countElement.textContent) - 1;
-                voteState[id] = null;
-                button.classList.remove('bg-red-200');
-                button.classList.add('bg-white');
-            } else {
-                if (voteState[id] === 'upvote') {
-                    const upvoteButton = document.getElementById(`upvote-${id}`);
-                    const upvoteCount = upvoteButton.querySelector('p');
-                    upvoteCount.textContent = parseInt(upvoteCount.textContent) - 1;
-                    upvoteButton.classList.remove('bg-blue-300');
-                    upvoteButton.classList.add('bg-white');
-                }
-                button.classList.remove('bg-white');
-                countElement.textContent = parseInt(countElement.textContent) + 1;
-                voteState[id] = 'downvote';
-                button.classList.add('bg-red-200');
-            }
+    // Initialize button styles based on data-vote-state
+    document.querySelectorAll('[data-vote-state]').forEach(button => {
+        const state = button.dataset.voteState;
+        if (state === 'upvote' && button.id.startsWith('upvote-')) {
+            button.classList.add('bg-blue-300');
+        } else if (state === 'downvote' && button.id.startsWith('downvote-')) {
+            button.classList.add('bg-red-200');
         }
+    });
+
+    // Function to send a vote and update the UI dynamically
+    const sendVote = (id, isPost, voteType) => {
+        const formData = new FormData();
+        const csrf = document.getElementById('csrf');
+        formData.append(isPost ? 'post_id' : 'comment_id', id);
+        formData.append('vote_type', voteType);
+        formData.append('csrf', csrf.value);
+    
+        fetch('/vote', {
+            method: 'POST',
+            body: formData,
+        }).then(response => {
+            if (response.ok) {
+                response.json().then(data => {
+                    // Update the vote counts dynamically
+                    const upvoteButton = document.getElementById(`upvote-${isPost ? 'post' : 'comment'}-${id}`);
+                    const downvoteButton = document.getElementById(`downvote-${isPost ? 'post' : 'comment'}-${id}`);
+    
+                    // Update the vote counts inside the <span> elements
+                    upvoteButton.querySelector('.vote-count').textContent = data.upvotes;
+                    downvoteButton.querySelector('.vote-count').textContent = data.downvotes;
+    
+                    // Reset button styles
+                    upvoteButton.classList.remove('bg-blue-300');
+                    downvoteButton.classList.remove('bg-red-200');
+    
+                    // Apply the new style based on the vote state
+                    if (data.user_vote === 'upvote') {
+                        upvoteButton.classList.add('bg-blue-300');
+                    } else if (data.user_vote === 'downvote') {
+                        downvoteButton.classList.add('bg-red-200');
+                    }
+                });
+            } else {
+                console.error('Failed to register vote');
+                alert('Failed to register your vote. Please try again.');
+            }
+        }).catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while processing your vote.');
+        });
     };
 
-    // Add event listeners to all upvote and downvote buttons
-    document.querySelectorAll('[id^="upvote-"]').forEach((button) => {
-        const id = button.id.split('-')[1]; // Extract the index from the button ID
-        const countElement = button.querySelector('p');
+    // Add event listeners for upvote buttons
+    document.querySelectorAll('[id^="upvote-"]').forEach(button => {
         button.addEventListener('click', () => {
-            updateVotes('upvote', button, countElement, id);
+            const id = button.id.split('-')[2];
+            const isPost = button.id.includes('post');
+            sendVote(id, isPost, 'upvote');
         });
     });
 
-    document.querySelectorAll('[id^="downvote-"]').forEach((button) => {
-        const id = button.id.split('-')[1]; // Extract the index from the button ID
-        const countElement = button.querySelector('p');
+    // Add event listeners for downvote buttons
+    document.querySelectorAll('[id^="downvote-"]').forEach(button => {
         button.addEventListener('click', () => {
-            updateVotes('downvote', button, countElement, id);
+            const id = button.id.split('-')[2];
+            const isPost = button.id.includes('post');
+            sendVote(id, isPost, 'downvote');
         });
     });
 });

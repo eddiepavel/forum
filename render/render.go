@@ -112,8 +112,10 @@ func handleHomePage(r *http.Request, app *app.Application, user *models.Users, d
 	if err != nil {
 		return fmt.Errorf("invalid page number: %v", err)
 	}
-
+	filter := r.URL.Query().Get("category")
+	fmt.Println("Filter 1:", filter)
 	totalPosts, err := app.DB.GetTotalPostCount(r.URL.Query().Get("category"), user)
+	fmt.Println("Total Posts:", totalPosts)
 	if err != nil {
 		return err
 	}
@@ -148,8 +150,11 @@ func handleViewPage(r *http.Request, app *app.Application, data *models.PageData
 	if err != nil {
 		return fmt.Errorf("invalid post ID: %v", err)
 	}
-
-	post, err := app.DB.GetPostByID(id)
+	userID := -1
+	if data.User != nil {
+		userID = data.User.ID
+	}
+	post, err := app.DB.GetPostByID(id, userID)
 	if err != nil {
 		return err
 	}

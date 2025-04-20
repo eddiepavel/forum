@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"forum-app/helpers"
 	"forum-app/models"
 
@@ -31,6 +32,9 @@ func (db *Connection) GetTotalPostCount(filter string, user *models.Users) (int,
 		if filter == "Created" {
 			query += ` WHERE author = ?`
 			args = append(args, user.ID)
+		} else if filter == "Liked" {
+			query += ` WHERE id IN (SELECT post_id FROM votes WHERE user_id = ? AND vote_type = 'upvote')`
+			args = append(args, user.ID)
 		} else {
 			query += ` WHERE categories LIKE ?`
 			args = append(args, "%"+filter+"%")
@@ -47,12 +51,14 @@ func (db *Connection) GetTotalPostCount(filter string, user *models.Users) (int,
 }
 
 func (db *Connection) GetPostsForHome(page int, filter string, user *models.Users) ([]models.Post, error) {
+	fmt.Println("filter:", filter)
 	const pageSize = 10
 	offset := (page - 1) * pageSize
 	var args []interface{}
-	query := `SELECT p.id, p.title, p.categories, p.content, p.author, p.time, p.upvotes, p.downvotes 
-              FROM post p 
-              JOIN user u ON p.author = u.id`
+	query := `SELECT p.id, p.title, p.categories, p.content, p.author, p.time, p.upvotes, p.downvotes, 
+                 (SELECT COUNT(*) FROM comment c WHERE c.post_id = p.id) AS comment_count
+          FROM post p 
+          JOIN user u ON p.author = u.id`
 	if filter != "" && filter != "Created" && filter != "Liked" {
 		query += ` WHERE p.categories LIKE ?`
 		args = append(args, "%"+filter+"%")
@@ -61,10 +67,13 @@ func (db *Connection) GetPostsForHome(page int, filter string, user *models.User
 		query += ` WHERE p.author = ?`
 		args = append(args, user.ID)
 	}
+	if filter == "Liked" {
+		query += ` WHERE p.id IN (SELECT post_id FROM votes WHERE user_id = ? AND vote_type = 'upvote')`
+		args = append(args, user.ID)
+	}
 	query += ` ORDER BY p.time DESC 
 			  LIMIT ? OFFSET ?`
 	args = append(args, pageSize, offset)
-
 	rows, err := db.DB.Query(query, args...)
 	if err != nil {
 		return nil, err
@@ -73,6 +82,7 @@ func (db *Connection) GetPostsForHome(page int, filter string, user *models.User
 
 	var posts []models.Post
 	var user_id int
+	var timeRaw time.Time
 	for rows.Next() {
 		var post models.Post
 		var categories string
@@ -82,9 +92,10 @@ func (db *Connection) GetPostsForHome(page int, filter string, user *models.User
 			&categories,
 			&post.Content,
 			&user_id,
-			&post.Time,
+			&timeRaw,
 			&post.Upvotes,
 			&post.Downvotes,
+			&post.CommentCount,
 		)
 		if err != nil {
 			return nil, err
@@ -93,6 +104,8 @@ func (db *Connection) GetPostsForHome(page int, filter string, user *models.User
 		if err != nil {
 			return nil, err
 		}
+
+		post.Time = timeRaw.Format("2006-01-02 15:04:05")
 		post.Categories = strings.Split(categories, ",")
 		posts = append(posts, post)
 	}
@@ -100,8 +113,8 @@ func (db *Connection) GetPostsForHome(page int, filter string, user *models.User
 	return posts, nil
 }
 
-func (db *Connection) GetPostByID(id int) (models.Post, error) {
-	query := `SELECT p.id, p.title, p.categories, p.content, p.author, p.time, p.upvotes, p.downvotes 
+func (db *Connection) GetPostByID(id int, userID int) (models.Post, error) {
+	query := `SELECT p.id, p.title, p.categories, p.content, p.author, p.time, p.upvotes, p.downvotes, p.vote_count 
               FROM post p 
               JOIN user u ON p.author = u.id 
               WHERE p.id = ?`
@@ -109,15 +122,17 @@ func (db *Connection) GetPostByID(id int) (models.Post, error) {
 
 	var categories string
 	var user_id int
+	var timeRaw time.Time
 	err := db.DB.QueryRow(query, id).Scan(
 		&post.ID,
 		&post.Title,
 		&categories,
 		&post.Content,
 		&user_id,
-		&post.Time,
+		&timeRaw,
 		&post.Upvotes,
 		&post.Downvotes,
+		&post.VoteCount,
 	)
 	if err != nil {
 		return post, err
@@ -126,16 +141,19 @@ func (db *Connection) GetPostByID(id int) (models.Post, error) {
 	if err != nil {
 		return post, err
 	}
-
+	post.Time = timeRaw.Format("2006-01-02 15:04:05")
 	post.Categories = strings.Split(categories, ",")
 
-	// Get comments for the post
-	commentsQuery := `SELECT c.content, c.author, c.time, c.upvotes, c.downvotes
+	var voteType string
+	err = db.DB.QueryRow(`SELECT vote_type FROM votes WHERE user_id = ? AND post_id = ?`, userID, id).Scan(&voteType)
+	if err == nil {
+		post.UserVote = voteType
+	} else {
+		post.UserVote = "none"
+	}
 
-                     FROM comment c 
-                     JOIN user u ON c.author = u.id 
-                     WHERE c.post_id = ?`
-
+	// Get comments and their vote states
+	commentsQuery := `SELECT c.id, c.content, c.author, c.time, c.upvotes, c.downvotes, c.vote_count FROM comment c WHERE c.post_id = ?`
 	rows, err := db.DB.Query(commentsQuery, id)
 	if err != nil {
 		return post, err
@@ -144,8 +162,9 @@ func (db *Connection) GetPostByID(id int) (models.Post, error) {
 
 	for rows.Next() {
 		var comment models.Comment
+		var timeRaw time.Time
 		var user_id int
-		err := rows.Scan(&comment.Content, &user_id, &comment.Time, &comment.Upvotes, &comment.Downvotes)
+		err := rows.Scan(&comment.ID, &comment.Content, &user_id, &timeRaw, &comment.Upvotes, &comment.Downvotes, &comment.VoteCount)
 		if err != nil {
 			return post, err
 		}
@@ -153,8 +172,86 @@ func (db *Connection) GetPostByID(id int) (models.Post, error) {
 		if err != nil {
 			return post, err
 		}
+		err = db.DB.QueryRow(`SELECT vote_type FROM votes WHERE user_id = ? AND comment_id = ?`, userID, comment.ID).Scan(&voteType)
+		if err == nil {
+			comment.UserVote = voteType
+		} else {
+			comment.UserVote = "none"
+		}
+		comment.Time = timeRaw.Format("2006-01-02 15:04:05")
 		post.Comments = append(post.Comments, comment)
 	}
 
 	return post, nil
+}
+
+func (db *Connection) SetVote(userID, postID, commentID int, voteType string) error {
+	// Check if a vote already exists
+	var existingVote string
+	query := `SELECT vote_type FROM votes WHERE user_id = ? AND post_id = ? AND comment_id = ?`
+	err := db.DB.QueryRow(query, userID, postID, commentID).Scan(&existingVote)
+
+	if err == nil {
+		// If the vote exists and is the same, remove it
+		if existingVote == voteType {
+			_, err := db.DB.Exec(`DELETE FROM votes WHERE user_id = ? AND post_id = ? AND comment_id = ?`, userID, postID, commentID)
+			if err == nil {
+				db.updateVoteCounts(postID, commentID)
+			}
+			return err
+		}
+
+		// If the vote exists but is different, update it
+		_, err := db.DB.Exec(`UPDATE votes SET vote_type = ? WHERE user_id = ? AND post_id = ? AND comment_id = ?`, voteType, userID, postID, commentID)
+		if err == nil {
+			db.updateVoteCounts(postID, commentID)
+		}
+		return err
+	}
+
+	// If no vote exists, insert a new one
+	_, err = db.DB.Exec(`INSERT INTO votes (user_id, post_id, comment_id, vote_type) VALUES (?, ?, ?, ?)`, userID, postID, commentID, voteType)
+	if err == nil {
+		db.updateVoteCounts(postID, commentID)
+	}
+	return err
+}
+
+func (db *Connection) updateVoteCounts(postID, commentID int) {
+	if postID != 0 {
+		db.DB.Exec(`UPDATE post SET 
+            upvotes = (SELECT COUNT(*) FROM votes WHERE post_id = ? AND vote_type = 'upvote'),
+            downvotes = (SELECT COUNT(*) FROM votes WHERE post_id = ? AND vote_type = 'downvote'),
+            vote_count = (upvotes - downvotes)
+            WHERE id = ?`, postID, postID, postID)
+	} else if commentID != 0 {
+		db.DB.Exec(`UPDATE comment SET 
+            upvotes = (SELECT COUNT(*) FROM votes WHERE comment_id = ? AND vote_type = 'upvote'),
+            downvotes = (SELECT COUNT(*) FROM votes WHERE comment_id = ? AND vote_type = 'downvote'),
+            vote_count = (upvotes - downvotes)
+            WHERE id = ?`, commentID, commentID, commentID)
+	}
+}
+
+func (db *Connection) GetPostVoteCounts(postID int) (int, int) {
+	var upvotes, downvotes int
+	db.DB.QueryRow(`SELECT COUNT(*) FROM votes WHERE post_id = ? AND vote_type = 'upvote'`, postID).Scan(&upvotes)
+	db.DB.QueryRow(`SELECT COUNT(*) FROM votes WHERE post_id = ? AND vote_type = 'downvote'`, postID).Scan(&downvotes)
+	return upvotes, downvotes
+}
+
+func (db *Connection) GetCommentVoteCounts(commentID int) (int, int) {
+	var upvotes, downvotes int
+	db.DB.QueryRow(`SELECT COUNT(*) FROM votes WHERE comment_id = ? AND vote_type = 'upvote'`, commentID).Scan(&upvotes)
+	db.DB.QueryRow(`SELECT COUNT(*) FROM votes WHERE comment_id = ? AND vote_type = 'downvote'`, commentID).Scan(&downvotes)
+	return upvotes, downvotes
+}
+
+func (db *Connection) GetUserVote(userID, postID, commentID int) string {
+	var voteType string
+	err := db.DB.QueryRow(`SELECT vote_type FROM votes WHERE user_id = ? AND post_id = ? AND comment_id = ?`, userID, postID, commentID).Scan(&voteType)
+	if err != nil {
+		return "none" // Default to "none" if no vote exists
+	}
+	return voteType
 }

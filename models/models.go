@@ -23,24 +23,30 @@ type Session struct {
 }
 
 type Post struct {
-	ID         int
-	Title      string
-	Categories []string
-	Content    template.HTML
-	Author     Users
-	Time       string
-	Upvotes    int
-	Downvotes  int
-	Comments   []Comment
+	ID           int
+	Title        string
+	Categories   []string
+	Content      template.HTML
+	Author       Users
+	Time         string
+	Upvotes      int
+	Downvotes    int
+	VoteCount    int
+	CommentCount int
+	Comments     []Comment
+	UserVote     string
 }
 
 type Comment struct {
+	ID        int
 	PostID    int
 	Content   template.HTML
 	Author    Users
 	Time      string
 	Upvotes   int
 	Downvotes int
+	VoteCount int
+	UserVote  string
 }
 
 type PageData struct {

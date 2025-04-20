@@ -6,6 +6,7 @@ CREATE TABLE comment (
     time DATETIME NOT NULL,
     upvotes INTEGER DEFAULT 0,
     downvotes INTEGER DEFAULT 0,
+    vote_count INTEGER DEFAULT 0,
     FOREIGN KEY(author) REFERENCES user(id),
     FOREIGN KEY(post_id) REFERENCES post(id)
 );
