@@ -25,7 +25,8 @@ func GetRegister(app *app.Application) http.HandlerFunc {
 		}
 	}
 }
-func StoreRegister(app *app.Application) http.HandlerFunc {
+
+func PostRegister(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := r.ParseForm()
 		if err != nil {

@@ -51,7 +51,14 @@ func PostCreate(app *app.Application) http.HandlerFunc {
 		// Validate the request
 		valid, errors := validator.ValidateRequest(r, inputs, app)
 		if !valid {
-			http.Error(w, fmt.Sprintf("Validation errors: %v", errors), http.StatusBadRequest)
+			cookie, err := r.Cookie("session")
+			if err != nil {
+				render.RenderError(w, r, err)
+				return
+			}
+			session, _ := app.Session.GetSession(cookie.Value)
+			session.SetFlash("error", errors)
+			http.Redirect(w, r, "/create", http.StatusFound)
 			return
 		}
 

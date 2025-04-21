@@ -2,12 +2,12 @@ package auth
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"forum-app/app"
 	"forum-app/middleware"
 	"forum-app/models"
 	"forum-app/render"
-	"html/template"
 	"net/http"
 	"strconv"
 )
@@ -36,6 +36,11 @@ func PostView(app *app.Application) http.HandlerFunc {
 		comment := r.FormValue("comment")
 		postId := r.FormValue("post_id")
 		authorId := r.FormValue("author_id")
+		user, _ := r.Context().Value(middleware.UserKey).(*models.Users)
+		if user == nil {
+			render.RenderError(w, r, errors.New("User not logged in"))
+			return
+		}
 
 		err := app.DB.SetComment(postId, comment, authorId)
 		if err != nil {
@@ -60,17 +65,7 @@ func DeletePost(app *app.Application) http.HandlerFunc {
 		user, _ := r.Context().Value(middleware.UserKey).(*models.Users)
 		err = app.DB.DeletePost(postID, user.ID)
 		if err != nil {
-			tmpl, err := template.ParseFiles("./assets/error.html")
-			if err != nil {
-				render.RenderError(w, r, err)
-				return
-			}
-			data := err.Error()
-			err = tmpl.Execute(w, data)
-			if err != nil {
-				render.RenderError(w, r, err)
-				return
-			}
+			render.RenderError(w, r, err)
 			return
 		}
 
@@ -102,10 +97,15 @@ func PostVote(app *app.Application) http.HandlerFunc {
 		var userVote string
 		if postID != 0 {
 			upvotes, downvotes = app.DB.GetPostVoteCounts(postID)
-			userVote = app.DB.GetUserVote(user.ID, postID, 0)
+			userVote, err = app.DB.GetUserVote(user.ID, postID, 0)
 		} else if commentID != 0 {
 			upvotes, downvotes = app.DB.GetCommentVoteCounts(commentID)
-			userVote = app.DB.GetUserVote(user.ID, 0, commentID)
+			userVote, err = app.DB.GetUserVote(user.ID, 0, commentID)
+		}
+
+		if err != nil {
+			render.RenderError(w, r, err)
+			return
 		}
 
 		// Return the updated data as JSON
