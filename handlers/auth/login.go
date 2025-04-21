@@ -14,8 +14,7 @@ func GetLogin(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		view, err := render.PrepareView("login", r, app)
 		if err != nil {
-			fmt.Println(err)
-			http.Error(w, "Something went wrong", http.StatusInternalServerError)
+			render.RenderError(w, r, err)
 			return
 		}
 
@@ -32,7 +31,7 @@ func PostLogin(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := r.ParseForm()
 		if err != nil {
-			http.Error(w, "Failed to parse form: "+err.Error(), http.StatusBadRequest)
+			render.RenderError(w, r, err)
 			return
 		}
 
@@ -46,7 +45,7 @@ func PostLogin(app *app.Application) http.HandlerFunc {
 		if !valid {
 			cookie, err := r.Cookie("session")
 			if err != nil {
-				http.Error(w, "Session cookie not found", http.StatusUnauthorized)
+				render.RenderError(w, r, err)
 				return
 			}
 			session, _ := app.Session.GetSession(cookie.Value)
@@ -59,7 +58,7 @@ func PostLogin(app *app.Application) http.HandlerFunc {
 		if err != nil || helpers.CompareHashAndPassword(user.Password, r.FormValue("password")) != nil {
 			cookie, err := r.Cookie("session")
 			if err != nil {
-				http.Error(w, "Session cookie not found", http.StatusUnauthorized)
+				render.RenderError(w, r, err)
 				return
 			}
 			session, _ := app.Session.GetSession(cookie.Value)

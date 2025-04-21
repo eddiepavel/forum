@@ -1,6 +1,8 @@
 package database
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"forum-app/helpers"
 	"forum-app/models"
@@ -51,7 +53,6 @@ func (db *Connection) GetTotalPostCount(filter string, user *models.Users) (int,
 }
 
 func (db *Connection) GetPostsForHome(page int, filter string, user *models.Users) ([]models.Post, error) {
-	fmt.Println("filter:", filter)
 	const pageSize = 10
 	offset := (page - 1) * pageSize
 	var args []interface{}
@@ -254,4 +255,34 @@ func (db *Connection) GetUserVote(userID, postID, commentID int) string {
 		return "none" // Default to "none" if no vote exists
 	}
 	return voteType
+}
+
+func (db *Connection) DeletePost(postID, userID int) error {
+	// Check if the user is the author of the post
+	var authorID int
+	err := db.DB.QueryRow(`SELECT author FROM post WHERE id = ?`, postID).Scan(&authorID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return fmt.Errorf("post not found")
+		}
+		return err
+	}
+
+	if authorID != userID {
+		return errors.New("403 Forbidden: You are not the author of this post")
+	}
+
+	// Proceed with deletion
+	query := `DELETE FROM post WHERE id = ? AND author = ?`
+	result, err := db.DB.Exec(query, postID, userID)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil || rowsAffected == 0 {
+		return fmt.Errorf("no rows deleted")
+	}
+
+	return nil
 }

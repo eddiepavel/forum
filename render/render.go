@@ -1,8 +1,10 @@
 package render
 
 import (
+	"errors"
 	"fmt"
 	"forum-app/app"
+	"forum-app/helpers"
 	"forum-app/middleware"
 	"forum-app/models"
 	"forum-app/session"
@@ -41,6 +43,20 @@ func (view *View) Render(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 	return nil
+}
+
+func RenderError(w http.ResponseWriter, r *http.Request, err error) {
+	tmpl, parseErr := template.ParseFiles("./assets/error.html")
+	if parseErr != nil {
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+	data := helpers.Beautify(err)
+	execErr := tmpl.Execute(w, data)
+	if execErr != nil {
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
 }
 
 func PrepareView(source string, r *http.Request, app *app.Application) (View, error) {
@@ -112,10 +128,7 @@ func handleHomePage(r *http.Request, app *app.Application, user *models.Users, d
 	if err != nil {
 		return fmt.Errorf("invalid page number: %v", err)
 	}
-	filter := r.URL.Query().Get("category")
-	fmt.Println("Filter 1:", filter)
 	totalPosts, err := app.DB.GetTotalPostCount(r.URL.Query().Get("category"), user)
-	fmt.Println("Total Posts:", totalPosts)
 	if err != nil {
 		return err
 	}
@@ -123,7 +136,7 @@ func handleHomePage(r *http.Request, app *app.Application, user *models.Users, d
 	const pageSize = 10
 	totalPages := (totalPosts + pageSize - 1) / pageSize
 	if (pageNum > totalPages || pageNum < 1) && totalPosts != 0 {
-		return fmt.Errorf("Couldn't find page %d", pageNum)
+		return errors.New("page number out of range")
 	}
 
 	if totalPosts == 0 {

@@ -7,6 +7,7 @@ import (
 	"forum-app/middleware"
 	"forum-app/models"
 	"forum-app/render"
+	"html/template"
 	"net/http"
 	"strconv"
 )
@@ -15,8 +16,7 @@ func GetView(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		view, err := render.PrepareView("view", r, app)
 		if err != nil {
-			fmt.Println(err)
-			http.Error(w, "Something went wrong", http.StatusInternalServerError)
+			render.RenderError(w, r, err)
 			return
 		}
 
@@ -39,7 +39,7 @@ func PostView(app *app.Application) http.HandlerFunc {
 
 		err := app.DB.SetComment(postId, comment, authorId)
 		if err != nil {
-			http.Error(w, "Something went wrong", http.StatusInternalServerError)
+			render.RenderError(w, r, err)
 			return
 		}
 
@@ -49,10 +49,39 @@ func PostView(app *app.Application) http.HandlerFunc {
 	}
 }
 
+func DeletePost(app *app.Application) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		postID, err := strconv.Atoi(r.URL.Query().Get("id"))
+		if err != nil || postID <= 0 {
+			render.RenderError(w, r, fmt.Errorf("invalid post ID"))
+			return
+		}
+
+		user, _ := r.Context().Value(middleware.UserKey).(*models.Users)
+		err = app.DB.DeletePost(postID, user.ID)
+		if err != nil {
+			tmpl, err := template.ParseFiles("./assets/error.html")
+			if err != nil {
+				render.RenderError(w, r, err)
+				return
+			}
+			data := err.Error()
+			err = tmpl.Execute(w, data)
+			if err != nil {
+				render.RenderError(w, r, err)
+				return
+			}
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+	}
+}
+
 func PostVote(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if err := r.ParseForm(); err != nil {
-			http.Error(w, "Invalid request", http.StatusBadRequest)
+			render.RenderError(w, r, err)
 			return
 		}
 
@@ -64,7 +93,7 @@ func PostVote(app *app.Application) http.HandlerFunc {
 		// Register the vote in the database
 		err := app.DB.SetVote(user.ID, postID, commentID, voteType)
 		if err != nil {
-			http.Error(w, "Failed to register vote", http.StatusInternalServerError)
+			render.RenderError(w, r, err)
 			return
 		}
 

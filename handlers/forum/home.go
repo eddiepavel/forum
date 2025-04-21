@@ -1,10 +1,10 @@
 package forum
 
 import (
+	"errors"
 	"fmt"
 	"forum-app/app"
 	"forum-app/render"
-	"html/template"
 	"net/http"
 )
 
@@ -12,13 +12,7 @@ func GetHome(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		view, err := render.PrepareView("home", r, app)
 		if err != nil {
-			data := err.Error()
-			tmpl, err := template.ParseFiles("./assets/error.html")
-			if err != nil {
-				http.Error(w, "Something went wrong", http.StatusInternalServerError)
-				return
-			}
-			tmpl.Execute(w, data)
+			render.RenderError(w, r, err)
 			return
 		}
 
@@ -43,16 +37,6 @@ func GetRedirect(app *app.Application) http.HandlerFunc {
 			return
 		}
 
-		tmpl, err := template.ParseFiles("./assets/error.html")
-		if err != nil {
-			http.Error(w, "Something went wrong", http.StatusInternalServerError)
-			return
-		}
-		data := "404 Not Found"
-		err = tmpl.Execute(w, data)
-		if err != nil {
-			http.Error(w, "Something went wrong", http.StatusInternalServerError)
-			return
-		}
+		render.RenderError(w, r, errors.New("Page not found"))
 	}
 }

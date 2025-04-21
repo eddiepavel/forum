@@ -7,6 +7,8 @@ module.exports = {
       'gap-x-48',
       'min-w-[450px]',
       'max-w-[450px]',
+      'min-h-[320px]',
+      'min-h-[50px]',
       'w-1/5',
       'w-4/5',
       'h-10',
@@ -46,5 +48,7 @@ module.exports = {
       'to-red-500',
       'via-red-400',
       'mr-1',
+      'ring-red-600',
+      'bg-red-50',
     ],
   };

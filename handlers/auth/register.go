@@ -13,8 +13,7 @@ func GetRegister(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		view, err := render.PrepareView("register", r, app)
 		if err != nil {
-			fmt.Println(err)
-			http.Error(w, "Something went wrong", http.StatusInternalServerError)
+			render.RenderError(w, r, err)
 			return
 		}
 
@@ -30,7 +29,7 @@ func StoreRegister(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := r.ParseForm()
 		if err != nil {
-			http.Error(w, "Bad Request", http.StatusBadRequest)
+			render.RenderError(w, r, err)
 			return
 		}
 
@@ -46,7 +45,7 @@ func StoreRegister(app *app.Application) http.HandlerFunc {
 		if !valid {
 			cookie, err := r.Cookie("session")
 			if err != nil {
-				http.Error(w, "Session cookie not found", http.StatusUnauthorized)
+				render.RenderError(w, r, err)
 				return
 			}
 			session, _ := app.Session.GetSession(cookie.Value)
@@ -61,14 +60,14 @@ func StoreRegister(app *app.Application) http.HandlerFunc {
 
 		if err != nil {
 			app.Logger.Info("Failed to hash password", "error", err)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			render.RenderError(w, r, err)
 			return
 		}
 
 		err = app.DB.RegisterUser(userEmail, userName, userPassword)
 		if err != nil {
 			app.Logger.Info("Failed to hash password", "error", err)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			render.RenderError(w, r, err)
 			return
 		}
 

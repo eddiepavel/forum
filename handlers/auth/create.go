@@ -13,8 +13,7 @@ func GetCreate(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		view, err := render.PrepareView("create", r, app)
 		if err != nil {
-			fmt.Println(err)
-			http.Error(w, "Something went wrong", http.StatusInternalServerError)
+			render.RenderError(w, r, err)
 			return
 		}
 
@@ -37,7 +36,7 @@ func PostCreate(app *app.Application) http.HandlerFunc {
 		// Parse the form data
 		err := r.ParseForm()
 		if err != nil {
-			http.Error(w, "Unable to parse form", http.StatusBadRequest)
+			render.RenderError(w, r, err)
 			return
 		}
 
@@ -69,7 +68,7 @@ func PostCreate(app *app.Application) http.HandlerFunc {
 		// Save the post to the database
 		err = app.DB.SetPost(title, content, author, categories)
 		if err != nil {
-			http.Error(w, "Unable to create post", http.StatusInternalServerError)
+			render.RenderError(w, r, err)
 			return
 		}
 

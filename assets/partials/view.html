@@ -14,10 +14,12 @@
             <dd class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset">{{.}}</dd>
           </a>
           {{end}}
-          {{if eq .User.ID $post.Author.ID}}
-          <button id="delete-post" class="z-10 px-2 py-1 shadow-lg bg-gradient-to-r from-red-300 via-red-400 to-red-500 text-xs rounded-md hover:bg-red-600 transition">
-            Delete
-          </button>
+          {{if .User}}
+            {{if eq .User.ID $post.Author.ID}}
+            <button data-action="delete-post" data-post-id="{{$post.ID}}" class="z-10 px-2 py-1 shadow-lg ring-1 ring-red-600 bg-red-50 ring-inset text-xs rounded-md hover:bg-red-600 transition">
+              Delete
+            </button>
+            {{end}}
           {{end}}
         </div>
         <div class="mt-6 flex items-center w-full flexgap-x-4 border-t border-gray-900/5 px-6 pt-6">

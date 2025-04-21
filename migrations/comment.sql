@@ -8,5 +8,5 @@ CREATE TABLE comment (
     downvotes INTEGER DEFAULT 0,
     vote_count INTEGER DEFAULT 0,
     FOREIGN KEY(author) REFERENCES user(id),
-    FOREIGN KEY(post_id) REFERENCES post(id)
+    CONSTRAINT fk_post_comment FOREIGN KEY (post_id) REFERENCES post(id) ON DELETE CASCADE
 );

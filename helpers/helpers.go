@@ -101,3 +101,31 @@ func SanitizeComment(content string) (string, error) {
 
 	return content, nil
 }
+
+func Beautify(err error) string {
+	if err == nil {
+		return ""
+	}
+	if strings.Contains(err.Error(), "duplicate") {
+		return "This record already exists. Please use a unique value."
+	}
+	if strings.Contains(err.Error(), "not found") {
+		return "The requested item could not be found. Please check your input."
+	}
+	if strings.Contains(err.Error(), "invalid") {
+		return "The input provided is invalid. Please correct it and try again."
+	}
+	if strings.Contains(err.Error(), "redirect URL") {
+		return "The redirect URL is invalid. Please contact support if the issue persists."
+	}
+	if strings.Contains(err.Error(), "validation rule") {
+		return "There was an issue with the validation rules. Please contact support."
+	}
+	if strings.Contains(err.Error(), "length") {
+		return "The input length is invalid. Please adhere to the specified limits."
+	}
+	if strings.Contains(err.Error(), "sql: no rows") {
+		return "No records found matching your criteria. Please check your input."
+	}
+	return "An unexpected error occurred: " + err.Error()
+}

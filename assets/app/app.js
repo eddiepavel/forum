@@ -108,6 +108,36 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+    const deleteButton = document.querySelector('button[data-action="delete-post"]');
+    if (!deleteButton) return;
+
+    deleteButton.addEventListener('click', () => {
+        const postID = deleteButton.dataset.postId;
+
+        if (confirm("Are you sure you want to delete this post? This action cannot be undone.")) {
+            fetch(`/view?id=${postID}`, {
+                method: 'DELETE',
+                headers: {
+                    'csrf': document.getElementById('csrf').value,
+                },
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert("Post deleted successfully.");
+                        window.location.href = '/home';
+                    } else {
+                        alert("Failed to delete the post.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("An error occurred while deleting the post.");
+                });
+        }
+    });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
     const pagePrev = document.getElementById('pagePrev');
     const pageNext = document.getElementById('pageNext');
 
