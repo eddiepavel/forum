@@ -67,6 +67,7 @@ func handleHomePage(r *http.Request, app *app.Application, user *models.Users, d
 	if err != nil {
 		return fmt.Errorf("invalid page number: %v", err)
 	}
+
 	totalPosts, err := app.DB.GetTotalPostCount(r.URL.Query().Get("category"), user)
 	if err != nil {
 		return err

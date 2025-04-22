@@ -27,6 +27,11 @@ func (db *Connection) SetPost(title, content, author, categories string) error {
 
 // GetTotalPostCount retrieves the total number of posts based on the provided filter and user context.
 func (db *Connection) GetTotalPostCount(filter string, user *models.Users) (int, error) {
+	if filter == "Liked" || filter == "Created" {
+		if user == nil {
+			return 0, errors.New("user not logged in")
+		}
+	}
 	query := `SELECT COUNT(*) FROM post`
 	var args []interface{}
 

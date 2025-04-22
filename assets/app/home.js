@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 document.addEventListener('DOMContentLoaded', () => {
     const categoryToggle = document.getElementById('category-toggle');
-    const categoryToggleRow = document.querySelector('h2'); // Select the entire row (h2 tag)
+    const categoryToggleRow = document.getElementById('cat-button'); // Select the entire row (h2 tag)
     const categoryContainer = document.getElementById('category-container');
     const categoryArrow = document.getElementById('category-arrow');
 
@@ -129,8 +129,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 document.addEventListener('DOMContentLoaded', () => {
     const categoryList = document.getElementById('filter-list');
-    const likedButton = Array.from(document.querySelectorAll('h2')).find(h2 => h2.textContent.trim() === "Liked");
-    const createdButton = Array.from(document.querySelectorAll('h2')).find(h2 => h2.textContent.trim() === "Created");
+    const likedButton = document.getElementById('liked-button');
+    const createdButton = document.getElementById('created-button');
+    const redirectToLogin = document.getElementById('login');
     
     // Add click event listeners to category items
     categoryList.querySelectorAll('li').forEach((item) => {
@@ -144,6 +145,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Add click event listener for "Liked"
     likedButton.addEventListener('click', () => {
+        if (redirectToLogin.value === 'login') {
+            window.location.href = '/login'; // Redirect to login page
+            return;
+        }
         const url = new URL(window.location.href);
         url.searchParams.set('category', 'Liked');
         window.location.href = url.toString();
@@ -151,6 +156,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Add click event listener for "Created"
     createdButton.addEventListener('click', () => {
+        if (redirectToLogin.value === 'login') {
+            window.location.href = '/login'; // Redirect to login page
+            return;
+        }
         const url = new URL(window.location.href);
         url.searchParams.set('category', 'Created');
         window.location.href = url.toString();

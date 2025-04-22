@@ -15,15 +15,17 @@
   
   <!-- Left Sidebar -->
   <div id="sidebar" class="hidden lg:block lg:fixed rounded-lg shadow-lg lg:w-1/5 bg-gradient-to-b from-gray-100 via-gray-200 to-gray-200 ring-1 ring-inset ring-gray-300 ml-2 lg:ml-6 p-4 mt-6 fixed top-[5rem] transform -translate-x-full transition-transform lg:translate-x-0 left-0 h-auto z-10">
-    <h2 class="px-6 py-2 text-2xl font-semibold text-gray-900 flex items-center justify-between">
-      Categories
-      <button id="category-toggle" type="button" class="ml-2 inline-flex items-center justify-center rounded-md py-1.5 text-gray-700">
+    <div class="flex flex-row justify-between">
+      <button id="cat-button" class="px-6 py-2 text-2xl font-semibold text-gray-900 flex items-center justify-between">
+      Categories</button>
+      <button id="category-toggle" type="button" class="ml-2 pr-4 inline-flex items-center justify-center rounded-md py-1.5 text-gray-700">
         <span class="sr-only">Toggle categories</span>
         <svg id="category-arrow" class="size-5 transform rotate-0 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
           <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.72-3.72a.75.75 0 0 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.23 8.27a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd" />
         </svg>
       </button>
-    </h2>
+    
+    </div>
     <div id="category-container" class="overflow-hidden">
       <ul id="filter-list" class="z-10 mt-1 w-full rounded-md py-1 ml-6 text-base sm:text-sm" role="listbox">
           {{range $index, $category := index .Data "categories"}}
@@ -33,14 +35,19 @@
           {{end}}
       </ul>
     </div>
-  {{if not .User}}
-  <a href="/login">
-  {{end}}
-    <h2 class="px-6 py-2 text-2xl font-semibold text-gray-900">Liked</h2>
-    <h2 class="px-6 py-2 text-2xl font-semibold text-gray-900">Created</h2>
-  {{if not .User}}
-  </a>
-  {{end}}
+    <div class="flex flex-col">
+      <div>
+        <input type="hidden" value="null" id="login">
+        {{if not .User}}
+          <input type="hidden" value="login" id="login">
+        {{end}}
+        <button id="liked-button" class="px-6 py-2 text-2xl font-semibold text-gray-900">Liked</button>
+      </div>
+      <div>
+        <button id="created-button" class="px-6 py-2 text-2xl font-semibold text-gray-900">Created</button>
+      </div>
+    </div>
+    
   <!-- Reset Filter Button -->
     <div class="absolute bottom-4 pr-2 right-4 py-2">
       <button id="reset-filter" class="hidden z-10 px-2 py-2 shadow-lg bg-gradient-to-r from-red-300 via-red-400 to-red-500 text-xs sm:text-sm rounded-md hover:bg-red-600 transition">
@@ -51,10 +58,10 @@
     <div class="flex z-1 flex-col px-3 lg:flex-row mt-10 py-6 lg:gap-8 max-w-4xl h-auto w-full">
       <div class="items-center mx-auto w-full">
         <h2 class="text-4xl justify-center mt-6 flex font-semibold tracking-tight text-pretty text-gray-900 sm:text-5xl">
-          From the blog
+          Insights from the Pros
         </h2>
         <p class="mt-2 py-2 text-xs lg:text-xl flex justify-center text-gray-600">
-          Learn how to grow your business with our expert advice.
+          Master your craft with tips from the best in the game.
         </p>
         {{if index .Data "posts"}}
           {{template "posts" .}}

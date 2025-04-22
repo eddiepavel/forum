@@ -12,6 +12,10 @@ func GetHome(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		view, err := render.PrepareView("home", r, app)
 		if err != nil {
+			if err == errors.New("user not logged in") {
+				http.Redirect(w, r, "/login", http.StatusSeeOther)
+				return
+			}
 			render.RenderError(w, r, err)
 			return
 		}
@@ -37,6 +41,6 @@ func GetRedirect(app *app.Application) http.HandlerFunc {
 			return
 		}
 
-		render.RenderError(w, r, errors.New("Page not found"))
+		render.RenderError(w, r, errors.New("page not found"))
 	}
 }
