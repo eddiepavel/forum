@@ -2,12 +2,9 @@ package validator
 
 import (
 	"errors"
-	"fmt"
 	"forum-app/app"
 	"forum-app/helpers"
 	"net/http"
-	"net/mail"
-	"strconv"
 	"strings"
 )
 
@@ -19,45 +16,7 @@ func NewValidator(app *app.Application) *Validator {
 	return &Validator{app: app}
 }
 
-func (v *Validator) ValidateString(value interface{}, key string) error {
-	_, ok := value.(string)
-	if !ok {
-		return errors.New(key + " value is not a valid string")
-	}
-	return nil
-}
-
-func (v *Validator) ValidateInt(value interface{}, key string) error {
-	switch v := value.(type) {
-	case int, int8, int16, int32, int64:
-		return nil
-	case string:
-		if _, err := strconv.Atoi(v); err == nil {
-			return nil
-		}
-	}
-	return errors.New(key + " value is not a valid integer")
-}
-
-func (v *Validator) ValidateEmail(value interface{}) error {
-	str, ok := value.(string)
-	if !ok {
-		return errors.New("value is not a string")
-	}
-	_, err := mail.ParseAddress(str)
-	if err != nil {
-		return errors.New("invalid email format")
-	}
-	return nil
-}
-
-func (v *Validator) Required(value interface{}, key string) error {
-	if value == "" {
-		return errors.New(key + " is required")
-	}
-	return nil
-}
-
+// ValidateInput validates a value against a set of rules and updates the hold map.
 func (v *Validator) ValidateInput(value interface{}, rules []interface{}, key string, hold map[string]interface{}) error {
 	for _, rule := range rules {
 		switch rule := rule.(type) {
@@ -99,6 +58,15 @@ func (v *Validator) ValidateInput(value interface{}, rules []interface{}, key st
 				if err := v.Exists(value, table, column); err != nil {
 					return err
 				}
+			case rule == "login_attempt":
+				email, emailExists := hold["email"].(string)
+				password, passwordExists := hold["password"].(string)
+				if !emailExists || !passwordExists {
+					return errors.New("email and password are required for login attempt validation")
+				}
+				if err := v.ValidateLoginAttempt(email, password); err != nil {
+					return err
+				}
 			default:
 				return errors.New("unknown validation rule: " + rule)
 			}
@@ -113,23 +81,7 @@ func (v *Validator) ValidateInput(value interface{}, rules []interface{}, key st
 	return nil
 }
 
-// Exists checks if a value exists in the specified table and column
-func (v *Validator) Exists(value interface{}, table, column string) error {
-	if v.app == nil || v.app.DB == nil || v.app.DB.DB == nil {
-		return errors.New("database connection is not available")
-	}
-	query := fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE %s = ?", table, column)
-	var count int
-	err := v.app.DB.DB.QueryRow(query, value).Scan(&count)
-	if err != nil {
-		return errors.New("database error: " + err.Error())
-	}
-	if count == 0 {
-		return errors.New(fmt.Sprintf("value '%v' does not exist in %s.%s", value, table, column))
-	}
-	return nil
-}
-
+// ValidateRequest validates HTTP request inputs based on provided rules and returns errors if any.
 func ValidateRequest(r *http.Request, inputs map[string][]interface{}, app *app.Application) (bool, map[string]string) {
 	r.ParseForm()
 

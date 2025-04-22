@@ -32,6 +32,7 @@ var categories = []string{
 	"Anouncements",
 	"Other"}
 
+// getUserAndSession retrieves the user and session from the request context.
 func getUserAndSession(r *http.Request) (*models.Users, *session.Session) {
 	user, _ := r.Context().Value(middleware.UserKey).(*models.Users)
 	session := r.Context().Value("user_session").(*session.Session)
@@ -41,6 +42,7 @@ func getUserAndSession(r *http.Request) (*models.Users, *session.Session) {
 	return user, session
 }
 
+// initializePageData initializes the page data with the given user and session.
 func initializePageData(user *models.Users, session *session.Session) models.PageData {
 	if user != nil {
 		return models.PageData{User: user, Session: session, Data: make(map[string]interface{})}
@@ -48,12 +50,14 @@ func initializePageData(user *models.Users, session *session.Session) models.Pag
 	return models.PageData{User: nil, Session: session, Data: make(map[string]interface{})}
 }
 
+// handleFlashMessages processes flash messages stored in the session and adds them to the page data.
 func handleFlashMessages(session *session.Session, data *models.PageData) {
 	if flash, exists := session.GetFlash("error"); exists {
 		data.Data["error"] = flash
 	}
 }
 
+// handleHomePage handles the logic for rendering the home page, including pagination and post retrieval.
 func handleHomePage(r *http.Request, app *app.Application, user *models.Users, data *models.PageData) error {
 	page := r.URL.Query().Get("page")
 	if page == "" {
@@ -89,6 +93,7 @@ func handleHomePage(r *http.Request, app *app.Application, user *models.Users, d
 	return nil
 }
 
+// handleViewPage handles the logic for rendering the view page for a specific post.
 func handleViewPage(r *http.Request, app *app.Application, data *models.PageData) error {
 	postID := r.URL.Query().Get("id")
 	if postID == "" {
@@ -110,6 +115,7 @@ func handleViewPage(r *http.Request, app *app.Application, data *models.PageData
 	return nil
 }
 
+// setCategories sets the list of categories in the page data.
 func setCategories(data *models.PageData) {
 	data.Data["categories"] = categories
 }

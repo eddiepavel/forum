@@ -13,6 +13,10 @@ type Connection struct {
 	DB *sql.DB
 }
 
+// Opens a connection to the database and runs migrations if the database file does not exist.
+// If the database file already exists, it simply opens the connection.
+// Returns a pointer to the Connection struct and an error if any occurs.
+// The database file is located at "././database/file/" + name.
 func NewConnection(name string) (*Connection, error) {
 
 	exists, _ := os.Stat("././database/file/" + name)

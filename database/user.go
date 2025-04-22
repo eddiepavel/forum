@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// CheckUserExists returns a function that checks if a user with the given email or username exists in the database.
 func (db *Connection) CheckUserExists(email, username string) func(interface{}) error {
 	return func(value interface{}) error {
 		var exists bool
@@ -24,6 +25,7 @@ func (db *Connection) CheckUserExists(email, username string) func(interface{}) 
 	}
 }
 
+// RegisterUser inserts a new user into the database with the provided email, username, and hashed password.
 func (db *Connection) RegisterUser(email, username, hashedPassword string) error {
 	query := `INSERT INTO user (email, username, password, createdAt)
 	          VALUES (?, ?, ?, ?)`
@@ -32,6 +34,7 @@ func (db *Connection) RegisterUser(email, username, hashedPassword string) error
 	return err
 }
 
+// GetUserByEmail retrieves a user from the database by their email address.
 func (db *Connection) GetUserByEmail(email string) (models.Users, error) {
 	query := `SELECT * FROM user WHERE email = ? LIMIT 1;`
 	var user models.Users
@@ -41,6 +44,7 @@ func (db *Connection) GetUserByEmail(email string) (models.Users, error) {
 	return user, err
 }
 
+// GetUserById retrieves a user from the database by their ID, excluding the password from the result.
 func (db *Connection) GetUserById(id int) (models.Users, error) {
 	query := `SELECT * FROM user WHERE id = ? LIMIT 1;`
 	var user models.Users

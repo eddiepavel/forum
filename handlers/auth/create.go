@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-// GetCreate is a handler function that returns the create forum page.
+// GetCreate returns an HTTP handler function for rendering the create post page.
 func GetCreate(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		view, err := render.PrepareView("create", r, app)
@@ -31,6 +31,7 @@ func GetCreate(app *app.Application) http.HandlerFunc {
 	}
 }
 
+// PostCreate handles the creation of a new forum post by validating input and saving it to the database.
 func PostCreate(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Parse the form data

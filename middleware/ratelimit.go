@@ -7,6 +7,8 @@ import (
 	"net/http"
 )
 
+// RateLimitMiddleware limits the number of requests a user can make within a specific time frame.
+// It uses the user's IP or username as the key for rate limiting.
 func RateLimitMiddleware(next http.HandlerFunc, app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var key string

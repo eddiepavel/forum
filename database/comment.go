@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// Add a comment to a post, in the db
 func (db *Connection) SetComment(postID, content, author string) error {
 	// Sanitize comment
 	cleanContent, err := helpers.SanitizeComment(content)

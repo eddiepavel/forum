@@ -7,6 +7,7 @@ import (
 	"net/http"
 )
 
+// Render renders the view using the provided HTTP response writer and request.
 func (view *View) Render(w http.ResponseWriter, r *http.Request) error {
 	tmpl, err := template.ParseFiles(view.Path...)
 	if err != nil {
@@ -19,6 +20,7 @@ func (view *View) Render(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+// RenderError renders an error page with the provided error message.
 func RenderError(w http.ResponseWriter, r *http.Request, err error) {
 	tmpl, parseErr := template.ParseFiles("./assets/error.html")
 	if parseErr != nil {
@@ -33,6 +35,7 @@ func RenderError(w http.ResponseWriter, r *http.Request, err error) {
 	}
 }
 
+// PrepareView prepares the view data and structure based on the source and request.
 func PrepareView(source string, r *http.Request, app *app.Application) (View, error) {
 	user, session := getUserAndSession(r)
 	data := initializePageData(user, session)

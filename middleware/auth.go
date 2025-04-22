@@ -11,6 +11,8 @@ type ContextKey string
 
 const UserKey ContextKey = "user"
 
+// AuthMiddleware authenticates users based on a session token stored in a cookie.
+// It adds the authenticated user to the request context if the session is valid.
 func AuthMiddleware(next http.HandlerFunc, app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 

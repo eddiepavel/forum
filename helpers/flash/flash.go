@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// HandleMessages handles flash messages by appending them to the query parameters of a redirect URL.
 func HandleMessages(w http.ResponseWriter, r *http.Request, messages map[string]string, redirectURL string, messageType string) {
 	u, err := url.Parse(redirectURL)
 	if err != nil {

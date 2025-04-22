@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+// SetPost inserts a new post into the database with the given title, content, author, and categories.
 func (db *Connection) SetPost(title, content, author, categories string) error {
 	// Sanitize input
 	cleanTitle, cleanContent, err := helpers.SanitizePost(title, content)
@@ -24,6 +25,7 @@ func (db *Connection) SetPost(title, content, author, categories string) error {
 	return err
 }
 
+// GetTotalPostCount retrieves the total number of posts based on the provided filter and user context.
 func (db *Connection) GetTotalPostCount(filter string, user *models.Users) (int, error) {
 	query := `SELECT COUNT(*) FROM post`
 	var args []interface{}
@@ -51,6 +53,7 @@ func (db *Connection) GetTotalPostCount(filter string, user *models.Users) (int,
 	return count, nil
 }
 
+// GetPostsForHome retrieves a paginated list of posts for the home page based on the filter and user context.
 func (db *Connection) GetPostsForHome(page int, filter string, user *models.Users) ([]models.Post, error) {
 	const pageSize = 10
 	offset := (page - 1) * pageSize
@@ -68,6 +71,7 @@ func (db *Connection) GetPostsForHome(page int, filter string, user *models.User
 	return db.scanPosts(rows)
 }
 
+// GetPostByID retrieves a post by its ID, including user-specific vote and comment data.
 func (db *Connection) GetPostByID(id int, userID int) (models.Post, error) {
 	post, err := db.fetchPostByID(id)
 	if err != nil {
@@ -87,6 +91,7 @@ func (db *Connection) GetPostByID(id int, userID int) (models.Post, error) {
 	return post, nil
 }
 
+// GetUserVote retrieves the vote type (e.g., upvote, downvote) for a specific user, post, and comment.
 func (db *Connection) GetUserVote(userID, postID, commentID int) (string, error) {
 	var voteType string
 	query := `SELECT vote_type FROM votes WHERE user_id = ? AND post_id = ? AND comment_id = ?`
@@ -97,6 +102,7 @@ func (db *Connection) GetUserVote(userID, postID, commentID int) (string, error)
 	return voteType, nil
 }
 
+// SetVote sets or updates a user's vote (upvote/downvote) for a specific post or comment.
 func (db *Connection) SetVote(userID, postID, commentID int, voteType string) error {
 	// Check if a vote already exists
 	var existingVote string
@@ -129,6 +135,7 @@ func (db *Connection) SetVote(userID, postID, commentID int, voteType string) er
 	return err
 }
 
+// GetPostVoteCounts retrieves the count of upvotes and downvotes for a specific post.
 func (db *Connection) GetPostVoteCounts(postID int) (int, int) {
 	var upvotes, downvotes int
 	db.DB.QueryRow(`SELECT COUNT(*) FROM votes WHERE post_id = ? AND vote_type = 'upvote'`, postID).Scan(&upvotes)
@@ -136,6 +143,7 @@ func (db *Connection) GetPostVoteCounts(postID int) (int, int) {
 	return upvotes, downvotes
 }
 
+// GetCommentVoteCounts retrieves the count of upvotes and downvotes for a specific comment.
 func (db *Connection) GetCommentVoteCounts(commentID int) (int, int) {
 	var upvotes, downvotes int
 	db.DB.QueryRow(`SELECT COUNT(*) FROM votes WHERE comment_id = ? AND vote_type = 'upvote'`, commentID).Scan(&upvotes)
@@ -143,6 +151,7 @@ func (db *Connection) GetCommentVoteCounts(commentID int) (int, int) {
 	return upvotes, downvotes
 }
 
+// DeletePost deletes a post from the database if the user is the author of the post.
 func (db *Connection) DeletePost(postID, userID int) error {
 	// Check if the user is the author of the post
 	var authorID int

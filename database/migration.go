@@ -5,6 +5,10 @@ import (
 	"os"
 )
 
+// RunMigrations runs the SQL migration files in the migrations directory.
+// It reads each file, executes the SQL commands, and prints the name of each file executed.
+// If an error occurs during the process, it returns the error.
+// It is assumed that the database connection is already established and available in the Connection struct.
 func (db *Connection) RunMigrations() error {
 
 	sqlFile, err := os.ReadDir("./migrations")

@@ -10,6 +10,7 @@ import (
 	"net/http"
 )
 
+// GetLogin returns an HTTP handler function for rendering the login page.
 func GetLogin(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		view, err := render.PrepareView("login", r, app)
@@ -27,6 +28,7 @@ func GetLogin(app *app.Application) http.HandlerFunc {
 	}
 }
 
+// PostLogin handles user login by validating credentials and creating a session.
 func PostLogin(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := r.ParseForm()
@@ -37,7 +39,7 @@ func PostLogin(app *app.Application) http.HandlerFunc {
 
 		inputs := map[string][]interface{}{
 			"email":    {"required", "string", "email"},
-			"password": {"required", "string"},
+			"password": {"required", "string", "login_attempt"},
 		}
 
 		valid, errors := validator.ValidateRequest(r, inputs, app)
@@ -55,15 +57,8 @@ func PostLogin(app *app.Application) http.HandlerFunc {
 		}
 
 		user, err := app.DB.GetUserByEmail(r.FormValue("email"))
-		if err != nil || helpers.CompareHashAndPassword(user.Password, r.FormValue("password")) != nil {
-			cookie, err := r.Cookie("session")
-			if err != nil {
-				render.RenderError(w, r, err)
-				return
-			}
-			session, _ := app.Session.GetSession(cookie.Value)
-			session.SetFlash("error", "Invalid email or password.")
-			http.Redirect(w, r, "/login", http.StatusFound)
+		if err != nil {
+			render.RenderError(w, r, err)
 			return
 		}
 

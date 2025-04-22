@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"html"
 	"strings"
 	"time"
@@ -12,16 +11,18 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// HashPassword hashes a plain-text password using bcrypt.
 func HashPassword(password string) (string, error) {
 	hashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	return string(hashed), err
 }
 
-// CompareHashAndPassword compares a hashed password with a plain-text one
+// CompareHashAndPassword compares a hashed password with a plain-text one.
 func CompareHashAndPassword(hashedPassword, plainPassword string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(plainPassword))
 }
 
+// GenerateToken generates a random 128-bit token encoded as a hexadecimal string.
 func GenerateToken() (string, error) {
 	bytes := make([]byte, 16) // 16 bytes = 128 bits
 	_, err := rand.Read(bytes)
@@ -31,13 +32,13 @@ func GenerateToken() (string, error) {
 	return hex.EncodeToString(bytes), nil
 }
 
+// DdSessionTimeSeconds calculates the remaining session time in seconds based on a target date.
 func DdSessionTimeSeconds(date string) int {
 
 	layout := "2006-01-02 15:04:05"
 
 	targetTime, err := time.Parse(layout, date)
 	if err != nil {
-		fmt.Println("Error parsing time:", err)
 		return -1
 	}
 
@@ -52,18 +53,19 @@ func DdSessionTimeSeconds(date string) int {
 	return maxAge
 }
 
+// CompareDatesLess checks if the first date is earlier than the second date.
 func CompareDatesLess(date1 time.Time, date2 string) bool {
 	layout := "2006-01-02 15:04:05"
 
 	time2, err := time.Parse(layout, date2)
 	if err != nil {
-		fmt.Println("Error parsing time:", err)
 		return false
 	}
 
 	return date1.Before(time2)
 }
 
+// SanitizePost sanitizes and validates the title and content of a post.
 func SanitizePost(title, content string) (string, string, error) {
 	// Trim spaces
 	title = strings.TrimSpace(title)
@@ -87,6 +89,7 @@ func SanitizePost(title, content string) (string, string, error) {
 	return title, content, nil
 }
 
+// SanitizeComment sanitizes and validates the content of a comment.
 func SanitizeComment(content string) (string, error) {
 	// Trim spaces
 	content = strings.TrimSpace(content)
@@ -102,6 +105,7 @@ func SanitizeComment(content string) (string, error) {
 	return content, nil
 }
 
+// Beautify converts error messages into user-friendly messages.
 func Beautify(err error) string {
 	if err == nil {
 		return ""
@@ -130,6 +134,7 @@ func Beautify(err error) string {
 	return "An unexpected error occurred: " + err.Error()
 }
 
+// BeautifyMessage formats a message by splitting on underscores and capitalizing the first word.
 func BeautifyMessage(message string) string {
 	newMessage := strings.Split(message, "_")
 

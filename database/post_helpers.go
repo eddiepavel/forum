@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// Build select query for posts depending on the filter and the user auth status.
 func (db *Connection) buildHomeQuery(filter string, user *models.Users) (string, []interface{}) {
 	query := `SELECT p.id, p.title, p.categories, p.content, p.author, p.time, p.upvotes, p.downvotes, 
                  (SELECT COUNT(*) FROM comment c WHERE c.post_id = p.id) AS comment_count
@@ -31,6 +32,7 @@ func (db *Connection) buildHomeQuery(filter string, user *models.Users) (string,
 	return query, args
 }
 
+// Fetch posts from the database based on the filter and user authentication status.
 func (db *Connection) scanPosts(rows *sql.Rows) ([]models.Post, error) {
 	var posts []models.Post
 
@@ -45,6 +47,9 @@ func (db *Connection) scanPosts(rows *sql.Rows) ([]models.Post, error) {
 	return posts, nil
 }
 
+// Scan a single post row from the database.
+// This function is used to convert the SQL row data into a Post model.
+// It also fetches the author of the post and formats the time.
 func (db *Connection) scanPostRow(rows *sql.Rows) (models.Post, error) {
 	var post models.Post
 	var categories string
@@ -77,6 +82,8 @@ func (db *Connection) scanPostRow(rows *sql.Rows) (models.Post, error) {
 	return post, nil
 }
 
+// The function returns the populated Post model or an error if any occurs.
+// It fetches the post details from the database using the provided post ID.
 func (db *Connection) fetchPostByID(id int) (models.Post, error) {
 	query := `SELECT p.id, p.title, p.categories, p.content, p.author, p.time, p.upvotes, p.downvotes, p.vote_count 
               FROM post p 
@@ -113,6 +120,9 @@ func (db *Connection) fetchPostByID(id int) (models.Post, error) {
 	return post, nil
 }
 
+// This function fetches the comments for a specific post from the database.
+// It retrieves the comments based on the post ID and user ID.
+// The function returns a slice of Comment models or an error if any occurs.
 func (db *Connection) fetchPostComments(postID, userID int) ([]models.Comment, error) {
 	query := `SELECT c.id, c.content, c.author, c.time, c.upvotes, c.downvotes, c.vote_count FROM comment c WHERE c.post_id = ?`
 	rows, err := db.DB.Query(query, postID)
@@ -133,6 +143,8 @@ func (db *Connection) fetchPostComments(postID, userID int) ([]models.Comment, e
 	return comments, nil
 }
 
+// This helper function scans a single comment row from the database.
+// It converts the SQL row data into a Comment model.
 func (db *Connection) scanCommentRow(rows *sql.Rows, userID int) (models.Comment, error) {
 	var comment models.Comment
 	var timeRaw time.Time
@@ -166,6 +178,11 @@ func (db *Connection) scanCommentRow(rows *sql.Rows, userID int) (models.Comment
 	return comment, nil
 }
 
+// This function updates the vote counts for a post or comment in the database.
+// It takes the post ID and comment ID as parameters.
+// Depending on which ID is provided, it updates the respective vote counts.
+// The function uses SQL queries to count the upvotes and downvotes from the votes table.
+// It also calculates the total vote count by subtracting downvotes from upvotes.
 func (db *Connection) updateVoteCounts(postID, commentID int) {
 	if postID != 0 {
 		db.DB.Exec(`UPDATE post SET 

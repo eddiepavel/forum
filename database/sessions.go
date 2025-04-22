@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// SessionExistsDB checks if a session exists for the given user ID and returns the session if found.
 func (db *Connection) SessionExistsDB(userId int) (*models.Session, bool, error) {
 	query := `SELECT * FROM session WHERE userId = ? LIMIT 1;`
 	var session models.Session
@@ -26,6 +27,7 @@ func (db *Connection) SessionExistsDB(userId int) (*models.Session, bool, error)
 	return &session, true, err
 }
 
+// CreateSession creates a new session for the given user ID and returns the session ID.
 func (db *Connection) CreateSession(userId int) (int, error) {
 
 	token, _ := helpers.GenerateToken()
@@ -44,8 +46,9 @@ func (db *Connection) CreateSession(userId int) (int, error) {
 	return int(lastId), err
 }
 
-func (db *Connection) GetSession(column string, param any) (*models.Session, error){
-	
+// GetSession retrieves a session based on the specified column and parameter.
+func (db *Connection) GetSession(column string, param any) (*models.Session, error) {
+
 	query := fmt.Sprintf("SELECT * FROM session WHERE %s = ? LIMIT 1;", column)
 
 	var session models.Session
@@ -59,6 +62,7 @@ func (db *Connection) GetSession(column string, param any) (*models.Session, err
 	return &session, nil
 }
 
+// DeleteSession deletes a session from the database by its ID.
 func (db *Connection) DeleteSession(sessionId int) error {
 	query := `DELETE FROM session WHERE id = ?;`
 
@@ -71,6 +75,7 @@ func (db *Connection) DeleteSession(sessionId int) error {
 	return err
 }
 
+// SessionInit initializes a session for the given user ID, creating a new session if necessary.
 func (db *Connection) SessionInit(userId int) (*models.Session, error) {
 	session, exists, err := db.SessionExistsDB(userId)
 	if err != nil {

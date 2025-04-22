@@ -9,6 +9,7 @@ import (
 	"net/http"
 )
 
+// GetRegister returns an HTTP handler function for rendering the registration page.
 func GetRegister(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		view, err := render.PrepareView("register", r, app)
@@ -26,6 +27,7 @@ func GetRegister(app *app.Application) http.HandlerFunc {
 	}
 }
 
+// PostRegister handles user registration by validating input and creating a new user.
 func PostRegister(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := r.ParseForm()

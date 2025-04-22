@@ -5,6 +5,7 @@ import (
 	"net/http"
 )
 
+// CommonHeaders sets common security-related HTTP headers for all responses.
 func CommonHeaders(next http.HandlerFunc, app *app.Application) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Note: This is split across multiple lines for readability. You don't

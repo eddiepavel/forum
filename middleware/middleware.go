@@ -6,8 +6,11 @@ import (
 	"net/http"
 )
 
+// Middleware represents a function that wraps an HTTP handler with additional functionality.
 type Middleware func(h http.HandlerFunc, app *app.Application) http.HandlerFunc
 
+// ChainMiddleware applies a sequence of middlewares to an HTTP handler.
+// It combines global middlewares with route-specific middlewares.
 func ChainMiddleware(h http.HandlerFunc, k []string, app *app.Application) http.HandlerFunc {
 
 	selectMiddle := map[string]Middleware{

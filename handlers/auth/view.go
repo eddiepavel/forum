@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,6 +13,7 @@ import (
 	"strconv"
 )
 
+// GetView returns an HTTP handler function for rendering a specific view page.
 func GetView(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		view, err := render.PrepareView("view", r, app)
@@ -29,6 +31,7 @@ func GetView(app *app.Application) http.HandlerFunc {
 	}
 }
 
+// PostView handles the submission of comments on a post.
 func PostView(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
@@ -54,6 +57,7 @@ func PostView(app *app.Application) http.HandlerFunc {
 	}
 }
 
+// DeletePost handles the deletion of a post by its ID.
 func DeletePost(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		postID, err := strconv.Atoi(r.URL.Query().Get("id"))
@@ -73,6 +77,7 @@ func DeletePost(app *app.Application) http.HandlerFunc {
 	}
 }
 
+// PostVote handles voting (upvote/downvote) on posts or comments.
 func PostVote(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if err := r.ParseForm(); err != nil {
@@ -98,14 +103,21 @@ func PostVote(app *app.Application) http.HandlerFunc {
 		if postID != 0 {
 			upvotes, downvotes = app.DB.GetPostVoteCounts(postID)
 			userVote, err = app.DB.GetUserVote(user.ID, postID, 0)
+			if err == sql.ErrNoRows {
+				userVote = "none" // No active vote
+			} else if err != nil {
+				render.RenderError(w, r, err)
+				return
+			}
 		} else if commentID != 0 {
 			upvotes, downvotes = app.DB.GetCommentVoteCounts(commentID)
 			userVote, err = app.DB.GetUserVote(user.ID, 0, commentID)
-		}
-
-		if err != nil {
-			render.RenderError(w, r, err)
-			return
+			if err == sql.ErrNoRows {
+				userVote = "none" // No active vote
+			} else if err != nil {
+				render.RenderError(w, r, err)
+				return
+			}
 		}
 
 		// Return the updated data as JSON

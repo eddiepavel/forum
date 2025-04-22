@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-// NewRateLimiter initializes a new RateLimiter.
+// NewRateLimiter initializes a new RateLimiter with a specified request limit and cooldown duration.
 func NewRateLimiter(limit int, cooldown time.Duration) *RateLimiter {
 	return &RateLimiter{
 		requests: make(map[string]*RateLimitData),
@@ -13,7 +13,7 @@ func NewRateLimiter(limit int, cooldown time.Duration) *RateLimiter {
 	}
 }
 
-// Allow checks if a request is allowed for the given key (IP or username).
+// Allow checks if a request is allowed for the given key (e.g., IP or username) and returns a boolean and cooldown duration.
 func (rl *RateLimiter) Allow(key string) (bool, time.Duration) {
 	rl.mu.Lock()
 	defer rl.mu.Unlock()
@@ -51,6 +51,7 @@ func (rl *RateLimiter) isWithinTimeWindow(data *RateLimitData) bool {
 	return data.LastAccess.Sub(data.InitAccess) <= time.Minute
 }
 
+// handleWithinTimeWindow processes requests within the rate limit time window and updates the rate limit data.
 func (rl *RateLimiter) handleWithinTimeWindow(data *RateLimitData, now time.Time) (bool, time.Duration) {
 	data.Count++
 	data.LastAccess = now
