@@ -9,7 +9,7 @@ import (
 func SessionMiddleware(next http.HandlerFunc, app *app.Application) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		getSessionCookie, err := r.Cookie("session")
-		if err != nil {
+		if _, exists := app.Session.GetSession(getSessionCookie.Value); err != nil || !exists {
 			session := app.Session.CreateSession()
 			session.Data = make(map[string]interface{})
 			sessionCookie := &http.Cookie{
@@ -24,12 +24,6 @@ func SessionMiddleware(next http.HandlerFunc, app *app.Application) http.Handler
 
 			next(w, r.WithContext(context))
 			return
-		} else {
-			session, exists := app.Session.GetSession(getSessionCookie.Value)
-			if !exists {
-				session = app.Session.CreateSession()
-				session.Data = make(map[string]interface{})
-			}
 		}
 
 		session, _ := app.Session.GetSession(getSessionCookie.Value)

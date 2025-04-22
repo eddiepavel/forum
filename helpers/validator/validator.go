@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"forum-app/app"
+	"forum-app/helpers"
 	"net/http"
 	"net/mail"
 	"strconv"
@@ -147,6 +148,10 @@ func ValidateRequest(r *http.Request, inputs map[string][]interface{}, app *app.
 		if err := v.ValidateInput(value, rules, key, hold); err != nil {
 			errors[key] = err.Error()
 		}
+	}
+
+	for index, errorMessage := range errors {
+		errors[index] = helpers.BeautifyMessage(errorMessage)
 	}
 
 	return len(errors) == 0, errors

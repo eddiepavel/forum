@@ -129,3 +129,14 @@ func Beautify(err error) string {
 	}
 	return "An unexpected error occurred: " + err.Error()
 }
+
+func BeautifyMessage(message string) string {
+	newMessage := strings.Split(message, "_")
+
+	if len(newMessage) > 1 {
+		newMessage[0] = strings.Title(newMessage[0])
+		return strings.Join(newMessage, " ")
+	}
+
+	return message
+}
