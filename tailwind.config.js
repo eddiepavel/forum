@@ -3,6 +3,9 @@ module.exports = {
       './**/*.html', // Ensure all relevant files are included
       './**/*.js',
     ],
+    plugins: [
+      require('@tailwindcss/line-clamp'),
+    ],
     safelist: [
       'gap-x-48',
       'min-w-[450px]',
@@ -50,5 +53,10 @@ module.exports = {
       'mr-1',
       'ring-red-600',
       'bg-red-50',
+      'break-words',
+      'text-ellipsis',
+      'overflow-hidden',
+      'break-all',
+      'text-opacity-25',
     ],
   };

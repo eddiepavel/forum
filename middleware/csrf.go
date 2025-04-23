@@ -38,7 +38,8 @@ func CsrfTokenMiddlware(next http.HandlerFunc, app *app.Application) http.Handle
 			sessionCsrfToken, ok := session.Data["csrf"].(string)
 
 			if !ok || formCsrfToken != sessionCsrfToken {
-				http.Error(w, "Invalid CSRF token", http.StatusForbidden)
+				session.SetFlash("csrf_error", "CSRF token mismatch")
+				http.Redirect(w, r, "/login", http.StatusFound)
 				return
 			}
 		}

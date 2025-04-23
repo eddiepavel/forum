@@ -41,7 +41,7 @@
           </dd>
         </div>
         <div class="mt-2 flex w-full flex-none gap-x-4 px-6">
-          <dd class="text-sm pl-8">{{$post.Content}}</dd>
+          <dd class="text-sm pl-8 break-all overflow-hidden text-ellipsis">{{$post.Content}}</dd>
         </div>
       </dl>
       <div class="mt-6 border-t border-gray-900/5 px-6 py-6">
@@ -115,7 +115,7 @@
         </dd>
       </div>
       <div class="mt-2 flex w-full flex-none gap-x-4 px-6">
-        <dd class="text-sm pl-8">{{$comment.Content}}</dd>
+        <dd class="text-sm pl-8 break-all overflow-hidden text-ellipsis">{{$comment.Content}}</dd>
       </div>
       <div class="px-6 py-2">
         {{if not $.User}}

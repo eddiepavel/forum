@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"fmt"
 	"forum-app/app"
 	"forum-app/render"
 
@@ -21,8 +20,7 @@ func GetLogin(app *app.Application) http.HandlerFunc {
 
 		err = view.Render(w, r)
 		if err != nil {
-			fmt.Println(err)
-			http.Error(w, "Something went wrong", http.StatusInternalServerError)
+			render.RenderError(w, r, err)
 			return
 		}
 	}

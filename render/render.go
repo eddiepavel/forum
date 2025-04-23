@@ -1,6 +1,7 @@
 package render
 
 import (
+	"errors"
 	"forum-app/app"
 	"forum-app/helpers"
 	"html/template"
@@ -39,6 +40,11 @@ func RenderError(w http.ResponseWriter, r *http.Request, err error) {
 func PrepareView(source string, r *http.Request, app *app.Application) (View, error) {
 	user, session := getUserAndSession(r)
 	data := initializePageData(user, session)
+
+	// Check for errors in the context
+	if flash, exists := session.GetFlash("csrf_error"); exists {
+		return View{}, errors.New(flash.(string))
+	}
 
 	handleFlashMessages(session, &data)
 
