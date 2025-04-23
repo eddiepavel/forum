@@ -5,6 +5,7 @@ import (
 	"forum-app/app"
 	"forum-app/render"
 	"net/http"
+	"strings"
 )
 
 // GetHome returns an HTTP handler function for rendering the home page.
@@ -12,7 +13,7 @@ func GetHome(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		view, err := render.PrepareView("home", r, app)
 		if err != nil {
-			if err == errors.New("user not logged in") {
+			if strings.Contains(err.Error(), "logged") {
 				http.Redirect(w, r, "/login", http.StatusSeeOther)
 				return
 			}

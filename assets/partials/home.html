@@ -37,9 +37,10 @@
     </div>
     <div class="flex flex-col">
       <div>
-        <input type="hidden" value="null" id="login">
         {{if not .User}}
-          <input type="hidden" value="login" id="login">
+           <input type="hidden" value="login" id="login">
+        {{else}}
+           <input type="hidden" value="null" id="login">
         {{end}}
         <button id="liked-button" class="px-6 py-2 text-2xl font-semibold text-gray-900">Liked</button>
       </div>
