@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"forum-app/helpers"
 	"net/mail"
+	"regexp"
 	"strconv"
 )
 
@@ -74,5 +75,27 @@ func (v *Validator) Required(value interface{}, key string) error {
 	if value == "" {
 		return errors.New(key + " is required")
 	}
+	return nil
+}
+
+// ValidatePassword validates a password based on modular rules.
+// It ensures the password has at least 8 characters and at least one number.
+func ValidatePassword(password string) error {
+	if len(password) < 8 {
+		return errors.New("password must be at least 8 characters long")
+	}
+
+	// Check if the password contains at least one number
+	hasNumber := regexp.MustCompile(`[0-9]`).MatchString
+	if !hasNumber(password) {
+		return errors.New("password must contain at least one number")
+	}
+
+	hasAlpha := regexp.MustCompile(`[a-zA-Z]`).MatchString
+	if !hasAlpha(password) {
+		return errors.New("password must contain at least one letter")
+	}
+
+	// Add more rules here if needed
 	return nil
 }

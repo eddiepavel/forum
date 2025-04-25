@@ -76,8 +76,8 @@ func SanitizePost(title, content string) (string, string, error) {
 	content = html.EscapeString(content)
 
 	// Validate lengths
-	if len(title) < 1 || len(title) > 100 {
-		return "", "", errors.New("title must be between 1 and 100 characters")
+	if len(title) < 1 || len(title) > 200 {
+		return "", "", errors.New("title must be between 1 and 200 characters")
 	}
 	if len(content) < 1 || len(content) > 5000 {
 		return "", "", errors.New("content must be between 1 and 5000 characters")
@@ -141,7 +141,8 @@ func BeautifyMessage(message string) string {
 	if len(newMessage) > 1 {
 		newMessage[0] = strings.Title(newMessage[0])
 		return strings.Join(newMessage, " ")
+	} else {
+		newMessage = strings.Split(message, " ")
+		return strings.Title(newMessage[0]) + " " + strings.Join(newMessage[1:], " ")
 	}
-
-	return message
 }

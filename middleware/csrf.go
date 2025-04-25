@@ -39,7 +39,7 @@ func CsrfTokenMiddlware(next http.HandlerFunc, app *app.Application) http.Handle
 
 			if !ok || formCsrfToken != sessionCsrfToken {
 				session.SetFlash("csrf_error", "CSRF token mismatch")
-				http.Redirect(w, r, "/login", http.StatusFound)
+				http.Redirect(w, r, r.URL.Path, http.StatusFound)
 				return
 			}
 		}

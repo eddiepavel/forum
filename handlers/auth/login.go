@@ -42,6 +42,8 @@ func PostLogin(app *app.Application) http.HandlerFunc {
 
 		valid, errors := validator.ValidateRequest(r, inputs, app)
 
+		email := r.FormValue("email")
+
 		if !valid {
 			cookie, err := r.Cookie("session")
 			if err != nil {
@@ -50,11 +52,12 @@ func PostLogin(app *app.Application) http.HandlerFunc {
 			}
 			session, _ := app.Session.GetSession(cookie.Value)
 			session.SetFlash("error", errors)
+			session.SetFlash("old_email", email)
 			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
 
-		user, err := app.DB.GetUserByEmail(r.FormValue("email"))
+		user, err := app.DB.GetUserByEmail(email)
 		if err != nil {
 			render.RenderError(w, r, err)
 			return

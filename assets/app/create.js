@@ -5,7 +5,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const listItems = document.querySelectorAll('#category-list li');
     const hiddenCategoryInput = document.getElementById('selected-category');
     const form = document.getElementById('post-form');
+    const outputSelected = document.getElementById('output-selected');
     const selectedCategories = new Set();
+
+    const updateSelectedCategories = () => {
+        outputSelected.textContent = `Selected categories: ${Array.from(selectedCategories).join(', ') || 'None'}`;
+    }
 
     // Function to toggle the dropdown
     const toggleDropdown = () => {
@@ -53,6 +58,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
             // Update the hidden input with selected categories
             hiddenCategoryInput.value = Array.from(selectedCategories).join(',');
+
+            updateSelectedCategories();
     
             // Toggle the purple tick visibility
             const checkIcon = item.querySelector('span[id^="check-"]');
@@ -86,4 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
             categoryList.classList.remove('hidden');
         }
     });
+
+    updateSelectedCategories();
 });

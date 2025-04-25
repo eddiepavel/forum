@@ -67,6 +67,14 @@ func (v *Validator) ValidateInput(value interface{}, rules []interface{}, key st
 				if err := v.ValidateLoginAttempt(email, password); err != nil {
 					return err
 				}
+			case rule == "password":
+				if password, ok := value.(string); ok {
+					if err := ValidatePassword(password); err != nil {
+						return err
+					}
+				} else {
+					return errors.New(key + " must be a valid string")
+				}
 			default:
 				return errors.New("unknown validation rule: " + rule)
 			}
@@ -104,6 +112,16 @@ func ValidateRequest(r *http.Request, inputs map[string][]interface{}, app *app.
 
 	for index, errorMessage := range errors {
 		errors[index] = helpers.BeautifyMessage(errorMessage)
+	}
+
+	// Remove duplicate error messages
+	uniqueErrors := make(map[string]bool)
+	for key, errorMessage := range errors {
+		if uniqueErrors[errorMessage] {
+			delete(errors, key) // Remove duplicate error
+		} else {
+			uniqueErrors[errorMessage] = true
+		}
 	}
 
 	return len(errors) == 0, errors

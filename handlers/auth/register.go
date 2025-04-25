@@ -39,11 +39,14 @@ func PostRegister(app *app.Application) http.HandlerFunc {
 		inputs := map[string][]interface{}{
 			"email":            {"required", "string", "email", app.DB.CheckUserExists(r.FormValue("email"), r.FormValue("username"))},
 			"username":         {"required", "string", app.DB.CheckUserExists(r.FormValue("email"), r.FormValue("username"))},
-			"password":         {"required", "string"},
+			"password":         {"required", "string", "password"},
 			"confirm_password": {"required", "string", "same:password"},
 		}
 
 		valid, errors := validator.ValidateRequest(r, inputs, app)
+
+		userEmail := r.FormValue("email")
+		userName := r.FormValue("username")
 
 		if !valid {
 			cookie, err := r.Cookie("session")
@@ -53,12 +56,12 @@ func PostRegister(app *app.Application) http.HandlerFunc {
 			}
 			session, _ := app.Session.GetSession(cookie.Value)
 			session.SetFlash("error", errors)
+			session.SetFlash("old_email", userEmail)
+			session.SetFlash("old_username", userName)
 			http.Redirect(w, r, "/register", http.StatusFound)
 			return
 		}
 
-		userEmail := r.FormValue("email")
-		userName := r.FormValue("username")
 		userPassword, err := helpers.HashPassword(r.FormValue("password"))
 
 		if err != nil {

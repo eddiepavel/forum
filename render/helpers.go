@@ -54,6 +54,12 @@ func initializePageData(user *models.Users, session *session.Session) models.Pag
 func handleFlashMessages(session *session.Session, data *models.PageData) {
 	if flash, exists := session.GetFlash("error"); exists {
 		data.Data["error"] = flash
+		old_email, _ := session.GetFlash("old_email")
+		old_username, exists := session.GetFlash("old_username")
+		if exists {
+			data.Data["old_username"] = old_username
+		}
+		data.Data["old_email"] = old_email
 	}
 }
 

@@ -9,16 +9,22 @@ import (
 // CheckUserExists returns a function that checks if a user with the given email or username exists in the database.
 func (db *Connection) CheckUserExists(email, username string) func(interface{}) error {
 	return func(value interface{}) error {
-		var exists bool
-		query := `SELECT EXISTS(SELECT 1 FROM user WHERE email = ? OR username = ?  LIMIT 1);`
+		var emailExists, usernameExists bool
+		query := `SELECT 
+            EXISTS(SELECT 1 FROM user WHERE email = ? LIMIT 1) AS emailExists,
+            EXISTS(SELECT 1 FROM user WHERE username = ? LIMIT 1) AS usernameExists;`
 
-		err := db.DB.QueryRow(query, email, username).Scan(&exists)
+		err := db.DB.QueryRow(query, email, username).Scan(&emailExists, &usernameExists)
 		if err != nil {
 			return fmt.Errorf("database error: %v", err)
 		}
 
-		if exists {
+		if emailExists && usernameExists {
+			return fmt.Errorf("user with email %s and username %s already exist", email, username)
+		} else if emailExists {
 			return fmt.Errorf("user with email %s already exists", email)
+		} else if usernameExists {
+			return fmt.Errorf("user with username %s already exists", username)
 		}
 
 		return nil
