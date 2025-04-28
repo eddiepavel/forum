@@ -86,6 +86,10 @@ func PostVote(app *app.Application) http.HandlerFunc {
 		}
 
 		user, _ := r.Context().Value(middleware.UserKey).(*models.Users)
+		if user == nil {
+			render.RenderError(w, r, errors.New("User not logged in"))
+			return
+		}
 		postID, _ := strconv.Atoi(r.FormValue("post_id"))
 		commentID, _ := strconv.Atoi(r.FormValue("comment_id"))
 		voteType := r.FormValue("vote_type")

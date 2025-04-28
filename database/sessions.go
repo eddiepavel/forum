@@ -71,20 +71,18 @@ func (db *Connection) DeleteSession(sessionId int) error {
 	if err != nil {
 		fmt.Println("Error deleting session")
 	}
-
 	return err
 }
 
 // SessionInit initializes a session for the given user ID, creating a new session if necessary.
 func (db *Connection) SessionInit(userId int) (*models.Session, error) {
 	session, exists, err := db.SessionExistsDB(userId)
+	fmt.Println("sess ", session, exists, err)
 	if err != nil {
 		return nil, err
 	}
 
-	if exists && !helpers.CompareDatesLess(session.ExpiresAt, time.Now().Format("2006-01-02 15:04:05")) {
-		return session, nil
-	} else if exists {
+	if exists {
 		db.DeleteSession(session.ID)
 	}
 

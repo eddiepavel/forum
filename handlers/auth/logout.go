@@ -18,8 +18,9 @@ func Logout(app *app.Application) http.HandlerFunc {
 		}
 
 		session, _ := app.DB.GetSession("userId", user.ID)
-
-		app.DB.DeleteSession(session.ID)
+		if session != nil {
+			app.DB.DeleteSession(session.ID)
+		}
 
 		expireCookie := http.Cookie{
 			Name:   "auth-token",

@@ -1,13 +1,13 @@
 {{define "posts"}}
 <div class="mt-8 space-y-12 border-t flex flex-col justify-center border-gray-200 pt-10 sm:mt-8 sm:pt-10">
     {{range $post := index .Data "posts"}}
-    <article class="w-full sm:max-w-[450px] flex flex-col items-start justify-between mx-auto border border-gray-200 p-4 rounded-lg shadow-xs hover:shadow-lg transition duration-300 ease-in-out relative">
+    <article class="w-full sm:max-w-[500px] flex flex-col items-start justify-between mx-auto border border-gray-200 p-4 rounded-lg shadow-xs hover:shadow-lg transition duration-300 ease-in-out relative">
         <a href="/view?id={{$post.ID}}" class="absolute inset-0 z-10"></a>
         <div class="flex w-full items-center justify-between text-xs flex-wrap gap-y-2">
             <time datetime="2020-03-16" class="text-gray-500">{{$post.Time}}</time>
-            <div class="flex items-center gap-x-1">
+            <div class="flex flex-wrap-reverse items-center justify-end lg:gap-x-1">
                 {{range $post.Categories}}
-                <a href="/home?category={{.}}" class="relative z-20 rounded-full bg-gray-50 px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-100">{{.}}</a>
+                <a href="/home?category={{.}}" class="relative z-20 text-xs rounded-full bg-gray-50 px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-100">{{.}}</a>
                 {{end}}
             </div>
         </div>

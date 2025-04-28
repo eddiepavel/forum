@@ -8,6 +8,7 @@ module.exports = {
     ],
     safelist: [
       'gap-x-48',
+      'max-w-[500px]',
       'min-w-[450px]',
       'max-w-[450px]',
       'min-h-[320px]',
@@ -63,6 +64,7 @@ module.exports = {
       'break-all',
       'tracking-tight',
       'text-transparent',
+      'space-y-1',
       'bg-clip-text',
       'from-blue-500',
       'via-purple-500',
@@ -70,5 +72,6 @@ module.exports = {
       'via-pink-500',
       'from-pink-500',
       'to-purple-500',
+      'flex-warp-reverse',
     ],
   };

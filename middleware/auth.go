@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"forum-app/app"
 	"net/http"
 	"time"
@@ -23,30 +24,31 @@ func AuthMiddleware(next http.HandlerFunc, app *app.Application) http.HandlerFun
 			return
 		}
 
+		// Retrieve the session
 		session, err := app.DB.GetSession("token", cookie.Value)
-
-		if err != nil && session == nil {
-			app.Logger.Error("Session not found", "error", err)
-			expireCookie := http.Cookie{
-				Name:   "auth-token",
-				Value:  "",
-				MaxAge: -1,
-			}
-			http.SetCookie(w, &expireCookie)
-			next(w, r)
+		if err != nil || session == nil {
+			fmt.Println("Session not found")
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
 
-		if session.ExpiresAt.Before(time.Now()) {
-			app.Logger.Error("Session expired", "error", err)
+		// Use session.ExpiresAt as is (local time)
+		expiresAt := session.ExpiresAt
+
+		// Use local time for comparison
+		now := time.Now().Add(time.Hour * 3).UTC() // Local time
+
+		if expiresAt.Before(now) {
 			app.DB.DeleteSession(session.ID)
+			fmt.Println("Session expired")
 			expireCookie := http.Cookie{
 				Name:   "auth-token",
 				Value:  "",
+				Path:   "/",
 				MaxAge: -1,
 			}
 			http.SetCookie(w, &expireCookie)
-			next(w, r)
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
 

@@ -63,7 +63,11 @@ func PostLogin(app *app.Application) http.HandlerFunc {
 			return
 		}
 
-		session, _ := app.DB.SessionInit(user.ID)
+		session, err := app.DB.SessionInit(user.ID)
+		if err != nil {
+			render.RenderError(w, r, err)
+			return
+		}
 
 		maxAge := helpers.DdSessionTimeSeconds(session.ExpiresAt.Format("2006-01-02 15:04:05"))
 

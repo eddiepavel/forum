@@ -4,23 +4,25 @@
     <h2 class="sr-only">Summary</h2>
     <div class="justify-center rounded-lg bg-gray-50 ring-1 shadow-xs w-4/5 ring-gray-900/5">
       <dl class="flex flex-wrap">
-        <div class="flex-auto pt-6 pl-6">
-          <div class="font-semibold text-gray-900 break-all overflow-hidden text-ellipsis">{{$post.Title}}</div>
-        </div>
-        <div class="flex gap-x-1 justify-center self-end px-6">
-          {{range $post.Categories}}
-          <dt class="sr-only">Category</dt>
-          <a href="/?category={{.}}">
-            <dd class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset">{{.}}</dd>
-          </a>
-          {{end}}
-          {{if .User}}
-            {{if eq .User.ID $post.Author.ID}}
-            <button data-action="delete-post" data-post-id="{{$post.ID}}" class="z-10 px-2 py-1 shadow-lg ring-1 ring-red-600 bg-red-50 ring-inset text-xs rounded-md hover:bg-red-600 transition">
-              Delete
-            </button>
+        <div class="flex flex-row items-start w-full justify-center">
+          <div class="flex-auto pt-6 px-3">
+            <div class="font-semibold text-gray-900 break-all overflow-hidden text-ellipsis px-1 sm:px-6">{{$post.Title}}</div>
+          </div>
+          <div class="flex flex-wrap gap-x-1 space-y-1 justify-center items-start pt-6 px-3">
+            {{range $post.Categories}}
+            <dt class="sr-only">Category</dt>
+            <a href="/home?category={{.}}">
+              <dd class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset">{{.}}</dd>
+            </a>
             {{end}}
-          {{end}}
+            {{if .User}}
+              {{if eq .User.ID $post.Author.ID}}
+              <button data-action="delete-post" data-post-id="{{$post.ID}}" class="z-10 px-2 py-1 shadow-lg ring-1 ring-red-600 bg-red-50 ring-inset text-xs rounded-md hover:bg-red-600 transition">
+                Delete
+              </button>
+              {{end}}
+            {{end}}
+          </div>
         </div>
         <div class="mt-6 flex items-center w-full flexgap-x-4 border-t border-gray-900/5 px-6 pt-6">
           <dt class="flex justify-center items-center">
