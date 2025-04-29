@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"forum-app/app"
@@ -20,6 +21,10 @@ var responseType string = "code"
 var scopeGoogle string = "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile"
 var accessType string = "offline"
 var googleSercret string = ""
+
+type ResponseGoogle struct {
+	AcccessToken string `json:"access_token"`
+}
 
 func LoginOAuth(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -86,8 +91,25 @@ func LoginOAuthCallback(app *app.Application) http.HandlerFunc {
 			}
 
 			fmt.Println(string(body))
+			accessToken := ResponseGoogle{}
+			err = json.Unmarshal(body, &accessToken)
 
-			w.Write(body)
+			if err != nil {
+				fmt.Println("dsadask")
+				return
+			}
+
+			clientInit := &http.Client{}
+			req, _ := http.NewRequest("GET", "https://www.googleapis.com/oauth2/v2/userinfo", nil)
+			req.Header.Set("Authorization", "Bearer "+accessToken.AcccessToken)
+
+			resp, _ = clientInit.Do(req)
+
+			defer resp.Body.Close()
+
+			googleUser, _ := io.ReadAll(resp.Body)
+
+			w.Write(googleUser)
 		}
 
 	}
