@@ -13,10 +13,6 @@ import (
 
 var supportedAuth = []string{"google", "github"}
 
-type ResponseGoogle struct {
-	AcccessToken string `json:"access_token"`
-}
-
 func LoginOAuth(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
@@ -43,9 +39,6 @@ func LoginOAuthCallback(app *app.Application) http.HandlerFunc {
 
 		stripPathname := strings.Split(r.URL.Path, "/")
 		authType := stripPathname[4]
-
-		fmt.Println(stripPathname)
-		fmt.Println(r.URL.RawQuery)
 
 		if !slices.Contains(supportedAuth, authType) && len(stripPathname) > 5 {
 			render.RenderError(w, r, errors.New("page not found"))
