@@ -1,4 +1,4 @@
-package evnutil
+package envutil
 
 import (
 	"bufio"
@@ -52,7 +52,6 @@ func scanEnvFile(file *os.File) error {
 
 	return scanner.Err()
 }
-
 
 func GetEnvString(key string) string {
 	val, exists := os.LookupEnv(key)
