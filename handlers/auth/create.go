@@ -5,7 +5,9 @@ import (
 	"forum-app/app"
 	"forum-app/helpers/validator"
 	"forum-app/render"
+	"io"
 	"net/http"
+	"os"
 )
 
 // GetCreate returns an HTTP handler function for rendering the create post page.
@@ -35,11 +37,11 @@ func GetCreate(app *app.Application) http.HandlerFunc {
 func PostCreate(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Parse the form data
-		err := r.ParseForm()
-		if err != nil {
-			render.RenderError(w, r, err)
-			return
-		}
+		//err := r.ParseMultipartForm(10 << 20) // 10 MB
+		//if err != nil {
+		//render.RenderError(w, r, err)
+		//return
+		//}
 
 		// Define validation rules
 		inputs := map[string][]interface{}{
@@ -47,6 +49,27 @@ func PostCreate(app *app.Application) http.HandlerFunc {
 			"description": {"required", "string"},
 			"categories":  {"sometimes", "string"},
 			"user_id":     {"required", "exists:user,id", "string"},
+		}
+		// Handle image upload
+		file, handler, err := r.FormFile("image")
+		var imagePath string
+		if err == nil {
+			defer file.Close()
+
+			// save to ./uploads folder — make sure it exists
+			imagePath = "./uploads/" + handler.Filename
+			dst, err := os.Create(imagePath)
+			if err != nil {
+				render.RenderError(w, r, err)
+				return
+			}
+			defer dst.Close()
+
+			_, err = io.Copy(dst, file)
+			if err != nil {
+				render.RenderError(w, r, err)
+				return
+			}
 		}
 
 		// Validate the request
@@ -74,7 +97,7 @@ func PostCreate(app *app.Application) http.HandlerFunc {
 		}
 
 		// Save the post to the database
-		err = app.DB.SetPost(title, content, author, categories)
+		err = app.DB.SetPost(title, content, author, categories, imagePath)
 		if err != nil {
 			render.RenderError(w, r, err)
 			return

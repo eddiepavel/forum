@@ -19,6 +19,10 @@
             <p class="mt-5 line-clamp-3 text-sm/6 text-gray-600 break-all overflow-hidden text-ellipsis">
                 {{$post.Content}}
             </p>
+                {{if $post.ImagePath}}
+                    <img src="{{$post.ImagePath}}" alt="Post image"
+                        class="mt-4 rounded-lg max-h-64 w-auto object-contain shadow-md">
+                {{end}}
         </div>
         <div class="relative mt-8 flex items-center justify-between w-full">
             <div class="flex items-center gap-x-2">
