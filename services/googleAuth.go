@@ -20,6 +20,14 @@ type GoogleAuthConfig struct {
 	GoogleSecret   string
 }
 
+type GoogleUser struct {
+	FamilyName string `json:"family_name"`
+	Name       string `json:"name"`
+	Picture    string `json:"picture"`
+	Email      string `json:"email"`
+	GivenName  string `json:"give_name"`
+}
+
 type ResponseGoogle struct {
 	AccessToken string `json:"access_token"`
 }
@@ -47,10 +55,10 @@ func (g *GoogleAuthConfig) GetAuthURL() string {
 	return fmt.Sprintf("%s?%s", g.GoogleRedirect, params.Encode())
 }
 
-func (g *GoogleAuthConfig) HandleOAuthCallback(r *http.Request) ([]byte, error) {
+func (g *GoogleAuthConfig) HandleOAuthCallback(r *http.Request) (GoogleUser, error) {
 	code := r.URL.Query().Get("code")
 	if code == "" {
-		return nil, errors.New("missing code in callback")
+		return GoogleUser{}, errors.New("missing code in callback")
 	}
 
 	params := url.Values{}
@@ -62,22 +70,22 @@ func (g *GoogleAuthConfig) HandleOAuthCallback(r *http.Request) ([]byte, error) 
 
 	resp, err := http.PostForm("https://oauth2.googleapis.com/token", params)
 	if err != nil {
-		return nil, fmt.Errorf("error posting form: %w", err)
+		return GoogleUser{}, fmt.Errorf("error posting form: %w", err)
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("error reading token response: %w", err)
+		return GoogleUser{}, fmt.Errorf("error reading token response: %w", err)
 	}
 
 	var accessTokenResp ResponseGoogle
 	if err := json.Unmarshal(body, &accessTokenResp); err != nil {
-		return nil, fmt.Errorf("error unmarshalling token response: %w", err)
+		return GoogleUser{}, fmt.Errorf("error unmarshalling token response: %w", err)
 	}
 
 	if accessTokenResp.AccessToken == "" {
-		return nil, errors.New("access token not found in response")
+		return GoogleUser{}, errors.New("access token not found in response")
 	}
 
 	client := &http.Client{}
@@ -86,14 +94,21 @@ func (g *GoogleAuthConfig) HandleOAuthCallback(r *http.Request) ([]byte, error) 
 
 	userInfoResp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("error fetching user info: %w", err)
+		return GoogleUser{}, fmt.Errorf("error fetching user info: %w", err)
 	}
 	defer userInfoResp.Body.Close()
 
 	userInfo, err := io.ReadAll(userInfoResp.Body)
+
 	if err != nil {
-		return nil, fmt.Errorf("error reading user info: %w", err)
+		return GoogleUser{}, fmt.Errorf("error reading user info: %w", err)
 	}
 
-	return userInfo, nil
+	var user GoogleUser
+
+	if err := json.Unmarshal(userInfo, &user); err != nil {
+		return GoogleUser{}, fmt.Errorf("error unmarshaling user info: %w", err)
+	}
+
+	return user, nil
 }

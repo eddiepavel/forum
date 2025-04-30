@@ -1,9 +1,11 @@
 package auth
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"forum-app/app"
+	"forum-app/helpers"
 	"forum-app/render"
 	googleAuthService "forum-app/services"
 	"net/http"
@@ -49,11 +51,51 @@ func LoginOAuthCallback(app *app.Application) http.HandlerFunc {
 			authService := googleAuthService.NewGoogleAuthConfig()
 			user, error := authService.HandleOAuthCallback(r)
 
-			if error != nil {
+			if error != nil || (googleAuthService.GoogleUser{}) == user {
 				render.RenderError(w, r, errors.New("call back fail"))
 			}
 
-			w.Write(user)
+			var UserID int64
+
+			dbUser, err := app.DB.GetUserByEmail(user.Email)
+
+			if err == sql.ErrNoRows {
+				id, _ := app.DB.RegisterOauthUser(user.Email, user.Name, "google", user.Picture)
+
+				UserID, _ = id.LastInsertId()
+			} else {
+
+				UserID = int64(dbUser.ID)
+
+				if dbUser.Auth != "google" {
+					render.RenderError(w, r, errors.New("auth missmatch"))
+				}
+			}
+
+			session, err := app.DB.SessionInit(int(UserID))
+
+			if err != nil {
+				render.RenderError(w, r, err)
+				return
+			}
+
+			maxAge := helpers.DdSessionTimeSeconds(session.ExpiresAt.Format("2006-01-02 15:04:05"))
+
+			cookie := http.Cookie{
+				Name:     "auth-token",
+				Value:    session.Token,
+				Path:     "/",
+				MaxAge:   maxAge,
+				HttpOnly: true,
+				Secure:   true,
+				SameSite: http.SameSiteLaxMode,
+			}
+
+			http.SetCookie(w, &cookie)
+
+			app.Logger.Info("User logged in", "email", user.Email)
+
+			http.Redirect(w, r, "/home", http.StatusFound)
 
 		}
 

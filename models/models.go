@@ -11,6 +11,8 @@ type Users struct {
 	Email     string
 	Username  string
 	Password  string
+	Auth      string
+	Picture   string
 	Is_Admin  int
 	CreatedAt time.Time
 }

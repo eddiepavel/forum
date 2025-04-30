@@ -5,7 +5,7 @@ import (
 	"flag"
 	"forum-app/app"
 	"forum-app/database"
-	evnutil "forum-app/helpers/envutil"
+	"forum-app/helpers/envutil"
 	"forum-app/ratelimiter"
 	"forum-app/routes"
 	"forum-app/session"
@@ -38,10 +38,11 @@ func main() {
 
 	rl := ratelimiter.NewRateLimiter(100, 1*time.Minute)
 
-	err = evnutil.LoadEnv(".env")
+	err = envutil.LoadEnv(".env")
 
 	if err != nil {
 		logger.Error("Application runtime error", "error", err)
+		os.Exit(1)
 		return
 	}
 

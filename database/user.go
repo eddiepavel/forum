@@ -1,6 +1,7 @@
 package database
 
 import (
+	"database/sql"
 	"fmt"
 	"forum-app/models"
 	"time"
@@ -32,21 +33,33 @@ func (db *Connection) CheckUserExists(email, username string) func(interface{}) 
 }
 
 // RegisterUser inserts a new user into the database with the provided email, username, and hashed password.
-func (db *Connection) RegisterUser(email, username, hashedPassword string) error {
-	query := `INSERT INTO user (email, username, password, createdAt)
-	          VALUES (?, ?, ?, ?)`
+func (db *Connection) RegisterUser(email, username, authType, hashedPassword string) error {
+	query := `INSERT INTO user (email, username, password, auth, createdAt)
+	          VALUES (?, ?, ?, ?, ?)`
 
-	_, err := db.DB.Exec(query, email, username, hashedPassword, time.Now().Format("2006-01-02 15:04:05"))
+	_, err := db.DB.Exec(query, email, username, hashedPassword, authType, time.Now().Format("2006-01-02 15:04:05"))
 	return err
+}
+
+// RegisterUser inserts a new user into the database with the provided oAuth.
+func (db *Connection) RegisterOauthUser(email, username, authType, photo string) (sql.Result, error) {
+	query := `INSERT INTO user (email, username, password, auth, picture, createdAt)
+	          VALUES (?, ?, NULL, ?, ?, ?)`
+
+	result, err := db.DB.Exec(query, email, username, authType, photo, time.Now().Format("2006-01-02 15:04:05"))
+	return result, err
 }
 
 // GetUserByEmail retrieves a user from the database by their email address.
 func (db *Connection) GetUserByEmail(email string) (models.Users, error) {
 	query := `SELECT * FROM user WHERE email = ? LIMIT 1;`
 	var user models.Users
-
-	err := db.DB.QueryRow(query, email).Scan(&user.ID, &user.Email, &user.Username, &user.Password, &user.Is_Admin, &user.CreatedAt)
-
+	var password any
+	var pic any
+	err := db.DB.QueryRow(query, email).Scan(&user.ID, &user.Email, &user.Username, &password, &user.Auth, &pic, &user.Is_Admin, &user.CreatedAt)
+	if password != nil {
+		user.Password = password.(string)
+	}
 	return user, err
 }
 
@@ -54,8 +67,10 @@ func (db *Connection) GetUserByEmail(email string) (models.Users, error) {
 func (db *Connection) GetUserById(id int) (models.Users, error) {
 	query := `SELECT * FROM user WHERE id = ? LIMIT 1;`
 	var user models.Users
-
-	err := db.DB.QueryRow(query, id).Scan(&user.ID, &user.Email, &user.Username, &user.Password, &user.Is_Admin, &user.CreatedAt)
-	user.Password = ""
+	var password any
+	err := db.DB.QueryRow(query, id).Scan(&user.ID, &user.Email, &user.Username, &password, &user.Auth, &user.Picture, &user.Is_Admin, &user.CreatedAt)
+	if password != nil {
+		user.Password = password.(string)
+	}
 	return user, err
 }
