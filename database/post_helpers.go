@@ -9,7 +9,7 @@ import (
 
 // Build select query for posts depending on the filter and the user auth status.
 func (db *Connection) buildHomeQuery(filter string, user *models.Users) (string, []interface{}) {
-	query := `SELECT p.id, p.title, p.categories, p.content, p.author, p.time, p.upvotes, p.downvotes, 
+	query := `SELECT p.id, p.title, p.categories, p.content, p.author, p.time, p.upvotes, p.downvotes, p.image_path, 
                  (SELECT COUNT(*) FROM comment c WHERE c.post_id = p.id) AS comment_count
           FROM post p 
           JOIN user u ON p.author = u.id`
@@ -66,6 +66,7 @@ func (db *Connection) scanPostRow(rows *sql.Rows) (models.Post, error) {
 		&post.Upvotes,
 		&post.Downvotes,
 		&post.CommentCount,
+		&post.Image,
 	)
 	if err != nil {
 		return post, err

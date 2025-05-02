@@ -70,12 +70,14 @@ func handleHomePage(r *http.Request, app *app.Application, user *models.Users, d
 		page = "1"
 	}
 	pageNum, err := strconv.Atoi(page)
+	fmt.Println("wtf1")
 	if err != nil {
 		return fmt.Errorf("invalid page number: %v", err)
 	}
-
+	fmt.Println("wtf2")
 	totalPosts, err := app.DB.GetTotalPostCount(r.URL.Query().Get("category"), user)
 	if err != nil {
+		fmt.Println(err, " wtf3")
 		return err
 	}
 
@@ -90,6 +92,7 @@ func handleHomePage(r *http.Request, app *app.Application, user *models.Users, d
 	} else {
 		posts, err := app.DB.GetPostsForHome(pageNum, r.URL.Query().Get("category"), user)
 		if err != nil {
+			fmt.Println(err, " wtf4")
 			return err
 		}
 		data.Data["posts"] = posts

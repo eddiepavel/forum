@@ -11,6 +11,7 @@ import (
 func Web(app *app.Application) http.Handler {
 	mux := http.NewServeMux()
 
+	mux.Handle("/uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir("./uploads"))))
 	mux.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets"))))
 	mux.HandleFunc("/", middleware.ChainMiddleware(forum.GetRedirect(app), []string{"auth"}, app))
 	mux.HandleFunc("GET /home", middleware.ChainMiddleware(forum.GetHome(app), []string{"auth"}, app))

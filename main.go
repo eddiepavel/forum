@@ -43,8 +43,6 @@ func main() {
 		Session:     session,
 		RateLimiter: rl,
 	}
-	http.Handle("/uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir("./uploads"))))
-
 	// Create HTTP server
 	server := &http.Server{
 		Addr:    *addr,

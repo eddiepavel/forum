@@ -35,6 +35,7 @@ type Post struct {
 	CommentCount int
 	Comments     []Comment
 	UserVote     string
+	Image        string
 }
 
 type Comment struct {
