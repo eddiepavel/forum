@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"forum-app/helpers/envutil"
+	oauth2 "forum-app/services"
 	"io"
 	"net/http"
 	"net/url"
@@ -18,6 +19,7 @@ type GoogleAuthConfig struct {
 	ScopeGoogle    string
 	AccessType     string
 	GoogleSecret   string
+	State          string
 }
 
 type GoogleUser struct {
@@ -32,7 +34,11 @@ type ResponseGoogle struct {
 	AccessToken string `json:"access_token"`
 }
 
-func NewGoogleAuthConfig() *GoogleAuthConfig {
+func (u GoogleUser) GetEmail() string   { return u.Email }
+func (u GoogleUser) GetName() string    { return u.Name }
+func (u GoogleUser) GetPicture() string { return u.Picture }
+
+func NewGoogleAuthConfig(state string) *GoogleAuthConfig {
 	return &GoogleAuthConfig{
 		GoogleRedirect: "https://accounts.google.com/o/oauth2/v2/auth",
 		GoogleClientId: envutil.GetEnvString("GOOGLE_PUBLIC_KEY"),
@@ -41,6 +47,7 @@ func NewGoogleAuthConfig() *GoogleAuthConfig {
 		ScopeGoogle:    "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
 		AccessType:     "offline",
 		GoogleSecret:   envutil.GetEnvString("GOOGLE_SECRET_KEY"),
+		State:          state,
 	}
 }
 
@@ -51,11 +58,17 @@ func (g *GoogleAuthConfig) GetAuthURL() string {
 	params.Add("response_type", g.ResponseType)
 	params.Add("scope", g.ScopeGoogle)
 	params.Add("access_type", g.AccessType)
+	params.Add("state", g.State)
 
 	return fmt.Sprintf("%s?%s", g.GoogleRedirect, params.Encode())
 }
 
-func (g *GoogleAuthConfig) HandleOAuthCallback(r *http.Request) (GoogleUser, error) {
+func (g *GoogleAuthConfig) HandleOAuthCallback(r *http.Request) (oauth2.OAuthUser, error) {
+
+	if g.State != r.URL.Query().Get("state") {
+		return GoogleUser{}, errors.New("missingstate")
+	}
+
 	code := r.URL.Query().Get("code")
 	if code == "" {
 		return GoogleUser{}, errors.New("missing code in callback")

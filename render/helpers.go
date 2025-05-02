@@ -35,7 +35,7 @@ var categories = []string{
 // getUserAndSession retrieves the user and session from the request context.
 func getUserAndSession(r *http.Request) (*models.Users, *session.Session) {
 	user, _ := r.Context().Value(middleware.UserKey).(*models.Users)
-	session := r.Context().Value("user_session").(*session.Session)
+	session := r.Context().Value(middleware.SessionKey).(*session.Session)
 	if session.Data == nil {
 		session.Data = make(map[string]interface{})
 	}
