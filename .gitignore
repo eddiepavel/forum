@@ -2,3 +2,5 @@
 node_modules
 .air.toml
 .env
+/.idea
+/uploads

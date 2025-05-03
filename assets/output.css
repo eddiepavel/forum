@@ -447,8 +447,8 @@
   .min-h-full {
     min-height: 100%;
   }
-  .w-1 {
-    width: calc(var(--spacing) * 1);
+  .w-1\/4 {
+    width: calc(1/4 * 100%);
   }
   .w-1\/5 {
     width: calc(1/5 * 100%);
@@ -834,6 +834,12 @@
   }
   .bg-clip-text {
     background-clip: text;
+  }
+  .object-cover {
+    object-fit: cover;
+  }
+  .object-center {
+    object-position: center;
   }
   .p-2 {
     padding: calc(var(--spacing) * 2);

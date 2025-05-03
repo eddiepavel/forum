@@ -23,6 +23,12 @@ func main() {
 	dbName := flag.String("db", "app.db", "Database file name sqlite3")
 	flag.Parse()
 
+	// Check and create uploads directory
+	err := ensureUploadsDir()
+	if err != nil {
+		panic(err)
+	}
+
 	// Initialize logger
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
@@ -52,7 +58,6 @@ func main() {
 		Session:     session,
 		RateLimiter: rl,
 	}
-
 	// Create HTTP server
 	server := &http.Server{
 		Addr:    *addr,
@@ -70,6 +75,17 @@ func main() {
 
 	// Graceful shutdown
 	waitForShutdown(server, logger)
+}
+
+func ensureUploadsDir() error {
+	const uploadsDir = "uploads"
+	if _, err := os.Stat(uploadsDir); os.IsNotExist(err) {
+		err := os.Mkdir(uploadsDir, 0755)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func initDatabase(dbName string, logger *slog.Logger) (*database.Connection, error) {

@@ -5,7 +5,9 @@ import (
 	"forum-app/app"
 	"forum-app/helpers/validator"
 	"forum-app/render"
+	"io"
 	"net/http"
+	"os"
 )
 
 // GetCreate returns an HTTP handler function for rendering the create post page.
@@ -34,19 +36,70 @@ func GetCreate(app *app.Application) http.HandlerFunc {
 // PostCreate handles the creation of a new forum post by validating input and saving it to the database.
 func PostCreate(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Parse the form data
-		err := r.ParseForm()
-		if err != nil {
-			render.RenderError(w, r, err)
-			return
-		}
-
 		// Define validation rules
 		inputs := map[string][]interface{}{
 			"title":       {"required", "string"},
 			"description": {"required", "string"},
 			"categories":  {"sometimes", "string"},
 			"user_id":     {"required", "exists:user,id", "string"},
+		}
+		// Handle image upload
+		file, handler, err := r.FormFile("image")
+		var imagePath string
+		if err == nil {
+			defer file.Close()
+
+			// Validate file type
+			validTypes := map[string]bool{
+				"image/jpeg": true,
+				"image/png":  true,
+				"image/gif":  true,
+				"image/jpg":  true,
+				"image/webp": true,
+			}
+
+			// Validate file size
+			const maxFileSize = 20 * 1024 * 1024 // 20 MB
+			if handler.Size > maxFileSize {
+				http.Error(w, "Image is too large. Max allowed size is 20 MB.", http.StatusBadRequest)
+				return
+			}
+
+			// Get the content type of the file
+			buffer := make([]byte, 512)
+			_, err = file.Read(buffer)
+			if err != nil {
+				render.RenderError(w, r, err)
+				return
+			}
+
+			contentType := http.DetectContentType(buffer)
+			if !validTypes[contentType] {
+				http.Error(w, "Invalid image type. Allowed types are JPEG, PNG, and GIF.", http.StatusBadRequest)
+				return
+			}
+
+			// Reset file pointer for saving
+			_, err = file.Seek(0, 0)
+			if err != nil {
+				render.RenderError(w, r, err)
+				return
+			}
+
+			// Save the image to ./uploads folder
+			imagePath = "./uploads/" + handler.Filename
+			dst, err := os.Create(imagePath)
+			if err != nil {
+				render.RenderError(w, r, err)
+				return
+			}
+			defer dst.Close()
+
+			_, err = io.Copy(dst, file)
+			if err != nil {
+				render.RenderError(w, r, err)
+				return
+			}
 		}
 
 		// Validate the request
@@ -74,7 +127,7 @@ func PostCreate(app *app.Application) http.HandlerFunc {
 		}
 
 		// Save the post to the database
-		err = app.DB.SetPost(title, content, author, categories)
+		err = app.DB.SetPost(title, content, author, categories, imagePath)
 		if err != nil {
 			render.RenderError(w, r, err)
 			return
