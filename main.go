@@ -61,12 +61,17 @@ func main() {
 	// Start server in a goroutine
 	go func() {
 		logger.Info("starting server", "addr", *addr)
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if err := server.ListenAndServeTLS("cert.pem", "key.pem"); err != nil && err != http.ErrServerClosed {
 			logger.Error("HTTP server error", "error", err)
 			os.Exit(1)
 		}
 	}()
-
+	// Added redirect from http to https
+	go func() {
+		http.ListenAndServe(":80", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			http.Redirect(w, r, "https://"+r.Host+r.URL.String(), http.StatusMovedPermanently)
+		}))
+	}()
 	// Graceful shutdown
 	waitForShutdown(server, logger)
 }
