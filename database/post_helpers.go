@@ -55,6 +55,7 @@ func (db *Connection) scanPostRow(rows *sql.Rows) (models.Post, error) {
 	var categories string
 	var userID int
 	var timeRaw time.Time
+	var imagePath sql.NullString
 
 	err := rows.Scan(
 		&post.ID,
@@ -65,8 +66,8 @@ func (db *Connection) scanPostRow(rows *sql.Rows) (models.Post, error) {
 		&timeRaw,
 		&post.Upvotes,
 		&post.Downvotes,
+		&imagePath,
 		&post.CommentCount,
-		&post.Image,
 	)
 	if err != nil {
 		return post, err
@@ -79,14 +80,16 @@ func (db *Connection) scanPostRow(rows *sql.Rows) (models.Post, error) {
 
 	post.Time = timeRaw.Format("2006-01-02 15:04:05")
 	post.Categories = strings.Split(categories, ",")
-
+	if imagePath.Valid {
+		post.Image = imagePath.String
+	}
 	return post, nil
 }
 
 // The function returns the populated Post model or an error if any occurs.
 // It fetches the post details from the database using the provided post ID.
 func (db *Connection) fetchPostByID(id int) (models.Post, error) {
-	query := `SELECT p.id, p.title, p.categories, p.content, p.author, p.time, p.upvotes, p.downvotes, p.vote_count 
+	query := `SELECT p.id, p.title, p.categories, p.content, p.author, p.time, p.upvotes, p.downvotes, p.vote_count, p.image_path 
               FROM post p 
               JOIN user u ON p.author = u.id 
               WHERE p.id = ?`
@@ -94,6 +97,7 @@ func (db *Connection) fetchPostByID(id int) (models.Post, error) {
 	var categories string
 	var userID int
 	var timeRaw time.Time
+	var imagePath sql.NullString
 
 	err := db.DB.QueryRow(query, id).Scan(
 		&post.ID,
@@ -105,6 +109,7 @@ func (db *Connection) fetchPostByID(id int) (models.Post, error) {
 		&post.Upvotes,
 		&post.Downvotes,
 		&post.VoteCount,
+		&imagePath,
 	)
 	if err != nil {
 		return post, err
@@ -117,6 +122,9 @@ func (db *Connection) fetchPostByID(id int) (models.Post, error) {
 
 	post.Time = timeRaw.Format("2006-01-02 15:04:05")
 	post.Categories = strings.Split(categories, ",")
+	if imagePath.Valid {
+		post.Image = imagePath.String
+	}
 
 	return post, nil
 }

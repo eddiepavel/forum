@@ -43,7 +43,6 @@ func PostCreate(app *app.Application) http.HandlerFunc {
 			"categories":  {"sometimes", "string"},
 			"user_id":     {"required", "exists:user,id", "string"},
 		}
-
 		// Handle image upload
 		file, handler, err := r.FormFile("image")
 		var imagePath string
@@ -55,6 +54,8 @@ func PostCreate(app *app.Application) http.HandlerFunc {
 				"image/jpeg": true,
 				"image/png":  true,
 				"image/gif":  true,
+				"image/jpg":  true,
+				"image/webp": true,
 			}
 
 			// Validate file size

@@ -1,6 +1,6 @@
 {{define "create"}}
 <!-- <form method="post" id="post-form" action="/create"> -->
-<form method="post" id="post-form" action="/create">
+<form method="post" id="post-form" action="/create" enctype="multipart/form-data">
     <div class="space-y-10 mt-5 pt-[6rem] items-center justify-center flex w-full">
         <div class="border-b w-4/5 border-gray-900/10 pb-12">
             <h2 class="text-base/7 font-semibold text-gray-900">Post</h2>
@@ -52,7 +52,7 @@
                         <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z"/>
                     </svg>
                 </span>
-                <input type="file" accept="image/*" class="relative inset-0 w-full h-full cursor-pointer">
+                <input type="file" id="image" name="image" accept="image/*" class="relative inset-0 w-full h-full cursor-pointer">
             </label>
         </div>
         <input type="hidden" name="categories" id="selected-category">    
