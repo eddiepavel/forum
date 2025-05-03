@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"flag"
 	"forum-app/app"
 	"forum-app/database"
@@ -43,11 +44,18 @@ func main() {
 		Session:     session,
 		RateLimiter: rl,
 	}
+	tlsConfig := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		CipherSuites: []uint16{
+			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+		},
+	}
 
 	// Create HTTP server
 	server := &http.Server{
-		Addr:    *addr,
-		Handler: routes.Web(app),
+		Addr:      *addr,
+		TLSConfig: tlsConfig,
+		Handler:   routes.Web(app),
 	}
 
 	// Start server in a goroutine
