@@ -9,18 +9,22 @@ import (
 	"forum-app/ratelimiter"
 	"forum-app/routes"
 	"forum-app/session"
+	"log"
 	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"golang.org/x/crypto/acme/autocert"
 )
 
 func main() {
-	// Parse flags
+	// Command line flags for configuration
 	addr := flag.String("addr", ":8080", "HTTP network address")
 	dbName := flag.String("db", "app.db", "Database file name sqlite3")
+	prod := flag.Bool("prod", false, "enable production HTTPS with Let's Encrypt")
 	flag.Parse()
 
 	// Initialize logger
@@ -34,39 +38,85 @@ func main() {
 	}
 	defer db.DB.Close()
 
+	// Session manager with 1-hour timeout for both session and idle time
 	session := session.NewSessionStore(1*time.Hour, 1*time.Hour)
 
+	// Rate limiter allowing 100 requests per minute per client
 	rl := ratelimiter.NewRateLimiter(100, 1*time.Minute)
 
+	// Application context holding all dependencies
 	app := &app.Application{
 		DB:          db,
 		Logger:      logger,
 		Session:     session,
 		RateLimiter: rl,
 	}
-	tlsConfig := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		CipherSuites: []uint16{
-			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-		},
+
+	// Security configuration for TLS
+	cipherSuites := []uint16{
+		tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+	}
+	// Cipher Suite explaination:
+	// ECDHE for key exchange
+	// RSA for authentication
+	// AES-128-GCM for encryption
+	// SHA256 for integrity check
+	minVersion := tls.VersionTLS12
+	var tlsConfig *tls.Config
+	var httpHandler http.Handler = routes.Web(app)
+	// TLS configuration based on environment (production vs development)
+	if *prod {
+		// ==== Production: autocert + Let's Encrypt ====
+		m := &autocert.Manager{
+			Cache:      autocert.DirCache("certs"), // cert cache dir
+			Prompt:     autocert.AcceptTOS,
+			HostPolicy: autocert.HostWhitelist("your.domain"), // replace with real domain
+		}
+
+		// Handle HTTP challenges for Let's Encrypt and redirect HTTP to HTTPS
+		go func() {
+			srv := &http.Server{
+				Addr:    ":80",
+				Handler: m.HTTPHandler(http.HandlerFunc(redirect)),
+			}
+			log.Fatal(srv.ListenAndServe())
+		}()
+
+		tlsConfig = &tls.Config{
+			GetCertificate: m.GetCertificate,
+			MinVersion:     uint16(minVersion),
+			CipherSuites:   cipherSuites,
+		}
+
+	} else {
+		// ==== Development: self-signed cert.pem/key.pem ====
+		cert, err := tls.LoadX509KeyPair("cert.pem", "key.pem")
+		if err != nil {
+			log.Fatalf("loading self-signed cert: %v", err)
+		}
+		tlsConfig = &tls.Config{
+			Certificates: []tls.Certificate{cert},
+			MinVersion:   uint16(minVersion),
+			CipherSuites: cipherSuites,
+		}
 	}
 
-	// Create HTTP server
+	// Configure and start the HTTPS server
 	server := &http.Server{
-		Addr:      *addr,
+		Addr:      ":443",
 		TLSConfig: tlsConfig,
-		Handler:   routes.Web(app),
+		Handler:   httpHandler,
 	}
-
-	// Start server in a goroutine
+	// Start HTTPS server in a separate goroutine
 	go func() {
 		logger.Info("starting server", "addr", *addr)
-		if err := server.ListenAndServeTLS("cert.pem", "key.pem"); err != nil && err != http.ErrServerClosed {
+		if err := server.ListenAndServeTLS("", ""); err != nil && err != http.ErrServerClosed {
 			logger.Error("HTTP server error", "error", err)
 			os.Exit(1)
 		}
 	}()
-	// Added redirect from http to https
+
+	// Start HTTP redirect server (redirects all HTTP traffic to HTTPS)
 	go func() {
 		http.ListenAndServe(":80", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "https://"+r.Host+r.URL.String(), http.StatusMovedPermanently)
@@ -75,6 +125,9 @@ func main() {
 	// Graceful shutdown
 	waitForShutdown(server, logger)
 }
+
+// initDatabase creates and initializes the database connection.
+// It returns a database connection wrapper and any error encountered.
 
 func initDatabase(dbName string, logger *slog.Logger) (*database.Connection, error) {
 	db, err := database.NewConnection(dbName)
@@ -102,4 +155,11 @@ func waitForShutdown(server *http.Server, logger *slog.Logger) {
 	} else {
 		logger.Info("Server stopped gracefully")
 	}
+}
+
+// redirect handles HTTP to HTTPS redirects.
+// It's used for both development and production environments.
+func redirect(w http.ResponseWriter, r *http.Request) {
+	target := "https://" + r.Host + r.URL.RequestURI()
+	http.Redirect(w, r, target, http.StatusMovedPermanently)
 }
