@@ -6,6 +6,7 @@ import (
 	"flag"
 	"forum-app/app"
 	"forum-app/database"
+	"forum-app/environment"
 	"forum-app/ratelimiter"
 	"forum-app/routes"
 	"forum-app/session"
@@ -14,6 +15,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -21,10 +23,22 @@ import (
 )
 
 func main() {
+
+	// first, load .env if present
+	if err := environment.LoadDotEnv(".env"); err != nil {
+		log.Fatalf("loading .env: %v", err)
+	}
+
+	// Read the  config from os.Getenv
+	isProd := os.Getenv("IS_PRODUCTION") == "true"
+	certFile := os.Getenv("CERT_FILE")
+	keyFile := os.Getenv("KEY_FILE")
+	cacheDir := os.Getenv("CERT_CACHE_DIR")
+	hostnames := strings.Split(os.Getenv("HOSTNAMES"), ",") // e.g. "example.com,www.example.com"  replace with real domain
+
 	// Command line flags for configuration
 	addr := flag.String("addr", ":8080", "HTTP network address")
 	dbName := flag.String("db", "app.db", "Database file name sqlite3")
-	prod := flag.Bool("prod", false, "enable production HTTPS with Let's Encrypt")
 	flag.Parse()
 
 	// Initialize logger
@@ -65,12 +79,12 @@ func main() {
 	var tlsConfig *tls.Config
 	var httpHandler http.Handler = routes.Web(app)
 	// TLS configuration based on environment (production vs development)
-	if *prod {
+	if isProd {
 		// ==== Production: autocert + Let's Encrypt ====
 		m := &autocert.Manager{
-			Cache:      autocert.DirCache("certs"), // cert cache dir
+			Cache:      autocert.DirCache(cacheDir), // cert cache dir
 			Prompt:     autocert.AcceptTOS,
-			HostPolicy: autocert.HostWhitelist("your.domain"), // replace with real domain
+			HostPolicy: autocert.HostWhitelist(hostnames...),
 		}
 
 		// Handle HTTP challenges for Let's Encrypt and redirect HTTP to HTTPS
@@ -90,7 +104,7 @@ func main() {
 
 	} else {
 		// ==== Development: self-signed cert.pem/key.pem ====
-		cert, err := tls.LoadX509KeyPair("cert.pem", "key.pem")
+		cert, err := tls.LoadX509KeyPair(certFile, keyFile)
 		if err != nil {
 			log.Fatalf("loading self-signed cert: %v", err)
 		}
