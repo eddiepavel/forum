@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
 	"forum-app/models"
 	"strings"
 	"time"
@@ -38,6 +39,7 @@ func (db *Connection) scanPosts(rows *sql.Rows) ([]models.Post, error) {
 
 	for rows.Next() {
 		post, err := db.scanPostRow(rows)
+		fmt.Println("err ", err)
 		if err != nil {
 			return nil, err
 		}
@@ -74,6 +76,7 @@ func (db *Connection) scanPostRow(rows *sql.Rows) (models.Post, error) {
 	}
 
 	post.Author, err = db.GetUserById(userID)
+	fmt.Println("error ", err)
 	if err != nil {
 		return post, err
 	}

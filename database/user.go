@@ -68,9 +68,13 @@ func (db *Connection) GetUserById(id int) (models.Users, error) {
 	query := `SELECT * FROM user WHERE id = ? LIMIT 1;`
 	var user models.Users
 	var password any
-	err := db.DB.QueryRow(query, id).Scan(&user.ID, &user.Email, &user.Username, &password, &user.Auth, &user.Picture, &user.Is_Admin, &user.CreatedAt)
+	var picture sql.NullString
+	err := db.DB.QueryRow(query, id).Scan(&user.ID, &user.Email, &user.Username, &password, &user.Auth, &picture, &user.Is_Admin, &user.CreatedAt)
 	if password != nil {
 		user.Password = password.(string)
+	}
+	if picture.Valid {
+		user.Picture = picture.String
 	}
 	return user, err
 }

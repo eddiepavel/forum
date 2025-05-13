@@ -120,7 +120,7 @@ func main() {
 
 	// Configure and start the HTTPS server
 	server := &http.Server{
-		Addr:      ":443",
+		Addr:      ":8443",
 		TLSConfig: tlsConfig,
 		Handler:   httpHandler,
 	}
