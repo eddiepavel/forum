@@ -58,6 +58,10 @@
           <input type="hidden" id="redirect-link" value="{{.Redirect}}">
         </form>
         {{end}}
+          {{if .User}}
+            <input type="hidden" id="post-author-id" value="{{$post.Author.ID}}">
+            <input type="hidden" id="action-author-id" value="{{.User.ID}}">
+          {{end}}
         <span class="isolate inline-flex rounded-md shadow-xs">
             <button {{if .User}} id="upvote-post-{{$post.ID}}" data-vote-state="{{$post.UserVote}}" {{end}} type="button" class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset focus:z-10" >
               <span class="sr-only">Upvote</span>
@@ -86,12 +90,13 @@
       {{if .User}}
       <label for="comment" class="block text-sm/6 font-medium text-gray-900"></label>
       <div>
-        <form method="post" id="comment-form" action="/view">
+        <form method="post" id="comment-form" action="/view" enctype="multipart/form-data">
           <input type="hidden" name="post_id" value="{{$post.ID}}">
-          <input id="csrf" type="hidden" name="csrf" value="{{index .Session.Data "csrf" }}">
-          <input type="hidden" name="author_id" value="{{.User.ID}}">
-          <input type="hidden" name="redirect" value="/view?id={{$post.ID}}">
           <textarea rows="2" name="comment" id="comment" required placeholder="Add your comment..." class="block w-full resize-none rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+          <input id="csrf" type="hidden" name="csrf" value="{{index .Session.Data "csrf" }}">
+          <input type="hidden" name="post_author_id" value="{{$post.Author.ID}}">
+          <input type="hidden" name="action_author_id" value="{{.User.ID}}">
+          <input type="hidden" name="redirect" value="/view?id={{$post.ID}}">
           <div class="flex mt-2 justify-end">
             <button type="submit" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Post</button>
           </div>

@@ -27,6 +27,9 @@ func Web(app *app.Application) http.Handler {
 	mux.HandleFunc("DELETE /view", middleware.ChainMiddleware(auth.DeletePost(app), []string{"auth"}, app))
 	mux.HandleFunc("/wip", middleware.ChainMiddleware(forum.GetWIP(app), []string{"auth"}, app))
 	mux.HandleFunc("POST /vote", middleware.ChainMiddleware(auth.PostVote(app), []string{"auth", "event"}, app))
+	mux.HandleFunc("GET /unread", middleware.ChainMiddleware(auth.GetUnreadNotifs(app), []string{"auth"}, app))
+	mux.HandleFunc("PUT /unread", middleware.ChainMiddleware(auth.MarkAsReadNotifs(app), []string{"auth"}, app))
+	mux.HandleFunc("GET /notifications", middleware.ChainMiddleware(auth.GetNotifications(app), []string{"auth"}, app))
 	mux.HandleFunc("GET /login/oauth/{type}", middleware.ChainMiddleware(auth.LoginOAuth(app), []string{}, app))
 	mux.HandleFunc("GET /login/oauth/callback/{type}", middleware.ChainMiddleware(auth.LoginOAuthCallback(app), []string{}, app))
 

@@ -18,6 +18,7 @@ func GetView(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		view, err := render.PrepareView("view", r, app)
 		if err != nil {
+			fmt.Println(err)
 			render.RenderError(w, r, err)
 			return
 		}
@@ -38,7 +39,7 @@ func PostView(app *app.Application) http.HandlerFunc {
 
 		comment := r.FormValue("comment")
 		postId := r.FormValue("post_id")
-		authorId := r.FormValue("author_id")
+		authorId := r.FormValue("action_author_id")
 		user, _ := r.Context().Value(middleware.UserKey).(*models.Users)
 		if user == nil {
 			render.RenderError(w, r, errors.New("User not logged in"))

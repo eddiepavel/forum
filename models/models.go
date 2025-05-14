@@ -52,6 +52,17 @@ type Comment struct {
 	UserVote  string
 }
 
+type Notification struct {
+	ID      int    `json:"id"`
+	PostID  int    `json:"postID"`
+	Target  Users  `json:"target"`
+	Actor   Users  `json:"actor"`
+	Time    string `json:"time"`
+	Type    string `json:"type"`
+	Read    bool   `json:"read"`
+	Content string `json:"content"`
+}
+
 type PageData struct {
 	Data     map[string]interface{}
 	User     *Users

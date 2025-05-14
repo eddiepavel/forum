@@ -46,7 +46,17 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append(isPost ? 'post_id' : 'comment_id', id);
         formData.append('vote_type', voteType);
         formData.append('csrf', csrf.value);
-    
+
+        const postAuthor = document.getElementById('post-author-id');
+        const actionAuthor = document.getElementById('action-author-id');
+        if (postAuthor) {
+            formData.append('post_author_id', postAuthor.value);
+        }
+        if (actionAuthor) {
+            formData.append('action_author_id', actionAuthor.value);
+        }
+
+
         fetch('/vote', {
             method: 'POST',
             body: formData,

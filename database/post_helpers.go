@@ -2,7 +2,6 @@ package database
 
 import (
 	"database/sql"
-	"fmt"
 	"forum-app/models"
 	"strings"
 	"time"
@@ -39,7 +38,6 @@ func (db *Connection) scanPosts(rows *sql.Rows) ([]models.Post, error) {
 
 	for rows.Next() {
 		post, err := db.scanPostRow(rows)
-		fmt.Println("err ", err)
 		if err != nil {
 			return nil, err
 		}
@@ -76,7 +74,7 @@ func (db *Connection) scanPostRow(rows *sql.Rows) (models.Post, error) {
 	}
 
 	post.Author, err = db.GetUserById(userID)
-	fmt.Println("error ", err)
+
 	if err != nil {
 		return post, err
 	}
@@ -136,7 +134,7 @@ func (db *Connection) fetchPostByID(id int) (models.Post, error) {
 // It retrieves the comments based on the post ID and user ID.
 // The function returns a slice of Comment models or an error if any occurs.
 func (db *Connection) fetchPostComments(postID, userID int) ([]models.Comment, error) {
-	query := `SELECT c.id, c.content, c.author, c.time, c.upvotes, c.downvotes, c.vote_count FROM comment c WHERE c.post_id = ?`
+	query := `SELECT c.id, c.content, c.author, c.time, c.upvotes, c.downvotes, c.vote_count FROM comment c WHERE c.post_id = ? ORDER BY c.time DESC`
 	rows, err := db.DB.Query(query, postID)
 	if err != nil {
 		return nil, err
