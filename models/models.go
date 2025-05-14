@@ -7,14 +7,14 @@ import (
 )
 
 type Users struct {
-	ID        int
-	Email     string
-	Username  string
-	Password  string
-	Auth      string
-	Picture   string
-	Is_Admin  int
-	CreatedAt time.Time
+	ID        int       `json:"id"`
+	Email     string    `json:"email"`
+	Username  string    `json:"username"`
+	Password  string    `json:"password"`
+	Auth      string    `json:"auth"`
+	Picture   string    `json:"picture"`
+	Is_Admin  int       `json:"is_admin"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type Session struct {
