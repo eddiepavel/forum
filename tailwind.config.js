@@ -13,6 +13,7 @@ module.exports = {
       'max-w-[450px]',
       'min-h-[320px]',
       'min-h-[50px]',
+      'max-h-96',
       'w-1/5',
       'w-4/5',
       'h-10',
@@ -73,5 +74,6 @@ module.exports = {
       'from-pink-500',
       'to-purple-500',
       'flex-warp-reverse',
+      'px-12',
     ],
   };

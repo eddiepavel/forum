@@ -20,7 +20,8 @@ var files = []string{
 	"./assets/partials/view.html",
 	"./assets/partials/wip.html",
 	"./assets/partials/login.html",
-	"./assets/partials/register.html"}
+	"./assets/partials/register.html",
+	"./assets/partials/notifications.html"}
 
 var categories = []string{
 	"General",
@@ -29,7 +30,7 @@ var categories = []string{
 	"Sports",
 	"News",
 	"Gaming",
-	"Anouncements",
+	"Announcements",
 	"Other"}
 
 // getUserAndSession retrieves the user and session from the request context.
