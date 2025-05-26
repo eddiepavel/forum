@@ -52,10 +52,12 @@ func (db *Connection) GetUnreadNotifications(userID int) ([]models.Notification,
 			return nil, err
 		}
 		notification.Target, err = db.GetUserById(target)
+		notification.Target.Password = ""
 		if err != nil {
 			return nil, err
 		}
 		notification.Actor, err = db.GetUserById(actor)
+		notification.Actor.Password = ""
 		if err != nil {
 			return nil, err
 		}

@@ -2,6 +2,7 @@ package auth
 
 import (
 	"encoding/json"
+	"errors"
 	"forum-app/app"
 	"forum-app/middleware"
 	"forum-app/models"
@@ -12,6 +13,10 @@ import (
 func GetUnreadNotifs(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user, _ := r.Context().Value(middleware.UserKey).(*models.Users)
+		if user == nil {
+			render.RenderError(w, r, errors.New("User not logged in"))
+			return
+		}
 		data, err := app.DB.GetUnreadNotifications(user.ID)
 		if err != nil {
 			render.RenderError(w, r, err)

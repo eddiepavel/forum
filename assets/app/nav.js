@@ -48,18 +48,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 throw new Error('Failed to fetch');
             }
             const data = await response.json();
-            renderNotifications(data);
-            setEnvelopeIcon(Array.isArray(data) && data.length > 0);
+            const listNotif = Object.values(data).flat();
+            renderNotifications(listNotif);
+            setEnvelopeIcon(listNotif.length > 0);
         } catch (error) {
             renderNotifications([]);
             setEnvelopeIcon(false);
         }
     }
 
-    function renderNotifications(notifs) {
+    function renderNotifications(listNotif) {
         if (!notifDropdown) return;
-
-        if (!Array.isArray(notifs) || notifs.length === 0) {
+        console.log(listNotif);
+        if (!Array.isArray(listNotif) || listNotif.length === 0) {
+            console.log("gay");
             notifDropdown.innerHTML = `
                 <div class="px-4 py-2 text-gray-400 text-sm">
                     No unread notifications
@@ -71,15 +73,29 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
         notifDropdown.innerHTML =
-            notifs.map(n =>
-                `<div class="px-4 py-2 border-b border-gray-100 hover:bg-gray-50">
-                    <div class="text-xs text-gray-700 font-semibold">${n.Actor?.Username || 'Someone'}</div>
-                    <div class="text-sm text-gray-800">${n.Content || ''}</div>
-                    <div class="text-xs text-gray-400">${n.Time || ''}</div>
-                 </div>`).join('') +
+            listNotif.map(n => {
+                    // Add other notification types as needed
+                    if (n.type === "comment") {
+                        // Make whole notification clickable
+                        return `<a href="/view?id=${n.postID}" class="block px-4 py-2 border-b border-gray-100 hover:bg-gray-50 transition-colors duration-150">
+                        <div class="text-sm text-gray-800">${n.actor?.username || "Someone"} commented ${n.content || ""}</div>
+                        <div class="text-xs text-gray-400">${n.time || ""}</div>
+                    </a>`;
+                    } else {
+                        // Add other notification types as needed
+                        return `<a href="/view?id=${n.postID}" class="block px-4 py-2 border-b border-gray-100 hover:bg-gray-50 transition-colors duration-150">
+                        <div class="px-4 py-2 border-b border-gray-100 hover:bg-gray-50">
+                        <div class="text-sm text-gray-800">${n.actor?.username || "Someone"} ${n.type}d your post</div>
+                        <div class="text-xs text-gray-400">${n.time || ""}</div>
+                        </div>
+                    </a>`;
+                    }
+
+
+            }).join('') +
             `<div class="flex w-full border-t pl-1 py-1 justify-center items-center">
-                <a href="/notifications" class="text-sm/6 font-semibold text-gray-900">Check all notifications</a>
-              </div>`;
+            <a href="/notifications" class="text-sm/6 font-semibold text-gray-900">Check all notifications</a>
+        </div>`;
     }
 
     // Fetch once on page load
@@ -91,6 +107,9 @@ document.addEventListener('DOMContentLoaded', function () {
         notifBtn.addEventListener('click', async function (e) {
             e.stopPropagation();
             notifDropdown.classList.toggle('hidden');
+
+            await fetchNotifications();
+
             if (!notifDropdown.classList.contains('hidden')) {
                 await fetch('/unread', {
                     method: 'PUT',
