@@ -1,0 +1,46 @@
+{{define "profile"}}
+<div class="flex flex-row mt-10 w-full items-center justify-between p-6">
+    {{if index .Data "activity"}}
+    <div class="flex">
+        Created
+        <br>
+        {{range $post := index .Data "created"}}
+            {{$post.PostID}} {{$post.PostTitle}}
+            {{$post.PostTimestamp}}
+            {{$post.ContentPreview}}
+            <br>
+        {{end}}
+    </div>
+    <div>
+        Voted
+        <br>
+        {{range $post := index .Data "voted"}}
+        {{$post.PostID}} {{$post.PostTitle}}
+        {{$post.Author}}
+        {{$post.PostTimestamp}}
+        {{$post.ContentPreview}}
+        {{$post.VoteType}}
+        <br>
+        {{end}}
+    </div>
+    <div>
+        Commented
+        <br>
+        {{range $post := index .Data "commented"}}
+        {{$post.PostID}} {{$post.PostTitle}}
+        {{$post.Author}}
+        {{$post.PostTimestamp}}
+        {{$post.ContentPreview}}
+        <br>
+        {{$post.CommentTimestamp}}
+        {{$post.CommentContent}}
+        <br><br>
+        {{end}}
+    </div>
+    {{else}}
+    <div class="flex w-full mt-10">
+        You have not created any posts yet.
+    </div>
+    {{end}}
+</div>
+{{end}}

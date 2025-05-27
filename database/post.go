@@ -76,6 +76,94 @@ func (db *Connection) GetPostsForHome(page int, filter string, user *models.User
 	return db.scanPosts(rows)
 }
 
+func (db *Connection) GetUserActivity(userID int) ([]models.UserPostActivity, error) {
+	var activity []models.UserPostActivity
+
+	// 1. User's created posts
+	qCreated := `
+		SELECT 
+			p.id, p.title, p.author, p.time, SUBSTR(p.content, 1, 200) as content
+		FROM post p
+		WHERE p.author = ?
+`
+	rows, err := db.DB.Query(qCreated, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var a models.UserPostActivity
+		var ts time.Time
+		if err := rows.Scan(&a.PostID, &a.PostTitle, &a.Author, &ts, &a.ContentPreview); err != nil {
+			return nil, err
+		}
+		a.EventType = "created"
+		a.PostTimestamp = ts.Format("2006-01-02 15:04:05")
+		activity = append(activity, a)
+	}
+	rows.Close()
+
+	// 2. Posts where user has left up/down vote
+	qVoted := `
+		SELECT 
+			p.id, p.title, p.author, p.time, SUBSTR(p.content, 1, 200) as content,
+			v.vote_type
+		FROM post p
+		JOIN votes v ON v.post_id = p.id
+		WHERE v.user_id = ? AND v.comment_id = 0
+`
+	rows, err = db.DB.Query(qVoted, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var a models.UserPostActivity
+		var ts time.Time
+		if err := rows.Scan(&a.PostID, &a.PostTitle, &a.Author, &ts, &a.ContentPreview, &a.VoteType); err != nil {
+			return nil, err
+		}
+		a.EventType = "voted"
+		a.PostTimestamp = ts.Format("2006-01-02 15:04:05")
+		activity = append(activity, a)
+	}
+	rows.Close()
+
+	// 3. Posts where the user has commented with what the user commented
+	qCommented := `
+		SELECT 
+			p.id, p.title, p.author, p.time, SUBSTR(p.content, 1, 200) as post_content,
+			SUBSTR(c.content, 1, 200) as comment_content,
+			c.time
+		FROM post p
+		JOIN comment c ON c.post_id = p.id
+		WHERE c.author = ?
+		`
+	rows, err = db.DB.Query(qCommented, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var a models.UserPostActivity
+		var ts time.Time
+		var cts string
+		if err := rows.Scan(
+			&a.PostID, &a.PostTitle, &a.Author, &ts, &a.ContentPreview, &a.CommentContent, &cts,
+		); err != nil {
+			return nil, err
+		}
+		a.EventType = "commented"
+		a.PostTimestamp = ts.Format("2006-01-02 15:04:05")
+		a.CommentTimestamp = cts
+		activity = append(activity, a)
+	}
+	rows.Close()
+
+	return activity, nil
+
+}
+
 // GetPostByID retrieves a post by its ID, including user-specific vote and comment data.
 func (db *Connection) GetPostByID(id int, userID int) (models.Post, error) {
 	post, err := db.fetchPostByID(id)

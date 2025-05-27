@@ -24,6 +24,18 @@ type Session struct {
 	UserId    int
 }
 
+type UserPostActivity struct {
+	PostID           int
+	PostTitle        string
+	Author           string
+	PostTimestamp    string
+	ContentPreview   string
+	VoteType         string // "upvote", "downvote", or ""
+	CommentContent   string // "" if not a comment event
+	CommentTimestamp string // nil if not a comment event
+	EventType        string // "created", "voted", "commented"
+}
+
 type Post struct {
 	ID           int
 	Title        string

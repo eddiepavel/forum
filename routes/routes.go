@@ -15,6 +15,7 @@ func Web(app *app.Application) http.Handler {
 	mux.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets"))))
 	mux.HandleFunc("/", middleware.ChainMiddleware(forum.GetRedirect(app), []string{"auth"}, app))
 	mux.HandleFunc("GET /home", middleware.ChainMiddleware(forum.GetHome(app), []string{"auth"}, app))
+	mux.HandleFunc("GET /profile/{UserID}", middleware.ChainMiddleware(auth.GetUserProfile(app), []string{"auth"}, app))
 	mux.HandleFunc("GET /login", middleware.ChainMiddleware(auth.GetLogin(app), []string{}, app))
 	mux.HandleFunc("POST /login", middleware.ChainMiddleware(auth.PostLogin(app), []string{}, app))
 	mux.HandleFunc("GET /register", middleware.ChainMiddleware(auth.GetRegister(app), []string{}, app))

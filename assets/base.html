@@ -21,6 +21,9 @@
   {{if eq .Source "view"}}
     {{template "view" .}}
   {{end}}
+  {{if eq .Source "profile"}}
+    {{template "profile" .}}
+  {{end}}
   {{if eq .Source "wip"}}
     {{template "wip" .}}
   {{end}}
