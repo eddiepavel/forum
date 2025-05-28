@@ -82,9 +82,10 @@ func (db *Connection) GetUserActivity(userID int) ([]models.UserPostActivity, er
 	// 1. User's created posts
 	qCreated := `
 		SELECT 
-			p.id, p.title, p.author, p.time, SUBSTR(p.content, 1, 200) as content
+			p.id, p.title, p.author, p.time, SUBSTR(p.content, 1, 40) as content
 		FROM post p
 		WHERE p.author = ?
+		ORDER BY p.time DESC
 `
 	rows, err := db.DB.Query(qCreated, userID)
 	if err != nil {
@@ -106,11 +107,12 @@ func (db *Connection) GetUserActivity(userID int) ([]models.UserPostActivity, er
 	// 2. Posts where user has left up/down vote
 	qVoted := `
 		SELECT 
-			p.id, p.title, p.author, p.time, SUBSTR(p.content, 1, 200) as content,
+			p.id, p.title, p.author, p.time, SUBSTR(p.content, 1, 40) as content,
 			v.vote_type
 		FROM post p
 		JOIN votes v ON v.post_id = p.id
 		WHERE v.user_id = ? AND v.comment_id = 0
+		ORDER BY p.time DESC
 `
 	rows, err = db.DB.Query(qVoted, userID)
 	if err != nil {
@@ -120,9 +122,12 @@ func (db *Connection) GetUserActivity(userID int) ([]models.UserPostActivity, er
 	for rows.Next() {
 		var a models.UserPostActivity
 		var ts time.Time
-		if err := rows.Scan(&a.PostID, &a.PostTitle, &a.Author, &ts, &a.ContentPreview, &a.VoteType); err != nil {
+		var authorId int
+		if err := rows.Scan(&a.PostID, &a.PostTitle, &authorId, &ts, &a.ContentPreview, &a.VoteType); err != nil {
 			return nil, err
 		}
+		user, _ := db.GetUserById(authorId)
+		a.Author = user.Username
 		a.EventType = "voted"
 		a.PostTimestamp = ts.Format("2006-01-02 15:04:05")
 		activity = append(activity, a)
@@ -132,12 +137,13 @@ func (db *Connection) GetUserActivity(userID int) ([]models.UserPostActivity, er
 	// 3. Posts where the user has commented with what the user commented
 	qCommented := `
 		SELECT 
-			p.id, p.title, p.author, p.time, SUBSTR(p.content, 1, 200) as post_content,
-			SUBSTR(c.content, 1, 200) as comment_content,
+			p.id, p.title, p.author, p.time, SUBSTR(p.content, 1, 40) as post_content,
+			SUBSTR(c.content, 1, 30) as comment_content,
 			c.time
 		FROM post p
 		JOIN comment c ON c.post_id = p.id
 		WHERE c.author = ?
+		ORDER BY c.time DESC
 		`
 	rows, err = db.DB.Query(qCommented, userID)
 	if err != nil {
@@ -147,15 +153,18 @@ func (db *Connection) GetUserActivity(userID int) ([]models.UserPostActivity, er
 	for rows.Next() {
 		var a models.UserPostActivity
 		var ts time.Time
-		var cts string
+		var cts time.Time
+		var authorId int
 		if err := rows.Scan(
-			&a.PostID, &a.PostTitle, &a.Author, &ts, &a.ContentPreview, &a.CommentContent, &cts,
+			&a.PostID, &a.PostTitle, &authorId, &ts, &a.ContentPreview, &a.CommentContent, &cts,
 		); err != nil {
 			return nil, err
 		}
 		a.EventType = "commented"
+		user, _ := db.GetUserById(authorId)
+		a.Author = user.Username
 		a.PostTimestamp = ts.Format("2006-01-02 15:04:05")
-		a.CommentTimestamp = cts
+		a.CommentTimestamp = cts.Format("2006-01-02 15:04:05")
 		activity = append(activity, a)
 	}
 	rows.Close()
