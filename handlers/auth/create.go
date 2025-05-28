@@ -119,7 +119,7 @@ func PostCreate(app *app.Application) http.HandlerFunc {
 			http.Redirect(w, r, "/create", http.StatusFound)
 			return
 		}
-
+		
 		// Extract validated form values
 		title := r.FormValue("title")
 		content := r.FormValue("description")
