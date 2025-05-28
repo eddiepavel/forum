@@ -129,6 +129,12 @@ func handleProfilePage(r *http.Request, app *app.Application, user *models.Users
 		}
 	}
 	data.Data["activity"] = true
+	data.Data["userID"] = id
+	userProf, err := app.DB.GetUserById(id)
+	if err != nil {
+		return err
+	}
+	data.Data["username"] = userProf.Username
 	data.Data["created"] = created
 	data.Data["voted"] = voted
 	data.Data["commented"] = commented

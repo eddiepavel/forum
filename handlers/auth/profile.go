@@ -3,8 +3,11 @@ package auth
 import (
 	"fmt"
 	"forum-app/app"
+	"forum-app/middleware"
+	"forum-app/models"
 	"forum-app/render"
 	"net/http"
+	"strconv"
 )
 
 func GetUserProfile(app *app.Application) http.HandlerFunc {
@@ -20,5 +23,17 @@ func GetUserProfile(app *app.Application) http.HandlerFunc {
 			http.Error(w, "Something went wrong", http.StatusInternalServerError)
 			return
 		}
+	}
+}
+
+func RedirectToProf(app *app.Application) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		user, ok := r.Context().Value(middleware.UserKey).(*models.Users)
+		if !ok || user == nil {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+		id := strconv.Itoa(user.ID)
+		http.Redirect(w, r, "/profile/"+id, http.StatusSeeOther)
 	}
 }

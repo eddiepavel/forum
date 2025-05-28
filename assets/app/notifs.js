@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     No unread notifications
                 </div>
                 <div class="flex w-full border-t pl-1 py-1 justify-center items-center">
-                    <a href="/notifications" class="text-sm/6 font-semibold text-gray-900">Check all notifications</a>
+                    <a href="/profile" class="text-sm/6 font-semibold text-gray-900">Check all activity</a>
                 </div>
             `;
             return;
@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             }).join('') +
             `<div class="flex w-full border-t pl-1 py-1 justify-center items-center">
-            <a href="/notifications" class="text-sm/6 font-semibold text-gray-900">Check all notifications</a>
+            <a href="/profile" class="text-sm/6 font-semibold text-gray-900">Check all activity</a>
         </div>`;
     }
 

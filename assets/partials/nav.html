@@ -1,11 +1,14 @@
 {{define "nav"}}
 <header class="bg-white fixed top-0 w-full z-50">
     <nav class="relative bg-white mx-auto flex items-center md:shadow-xs justify-between p-6 lg:px-8" aria-label="Global">
-        <div class="flex">
+        <div class="flex items-center gap-x-4 flex-row">
             <a href="/home" class="flex-shrink-0 flex items-center">
                 <span class="sr-only">Your Company</span>
                 <img class="h-8 lg:h-10 w-auto" src="/assets/app/logo.png" alt="Your Company">
             </a>
+            {{if eq .Source "profile"}}
+            <p class="font-semibold text-xl">{{if eq .User.ID (index .Data "userID")}}Your Profile{{else}} {{index .Data "username"}}'s Profile {{end}}</p>
+            {{end}}
         </div>
         <!-- Search -->
         {{if eq .Source "home"}}
