@@ -1,0 +1,93 @@
+{{define "profile"}}
+<div class="flex flex-col items-center mb-8 relative">
+    <div class="flex flex-row mt-12 pt-12 w-4/5 items-center justify-around p-6">
+        <p class="tab-button flex items-center text-base md:text-xl cursor-pointer hover:text-blue-600 transition-colors border-b-2 border-transparent">Created</p>
+        <p class="tab-button flex items-center text-base md:text-xl cursor-pointer hover:text-blue-600 transition-colors border-b-2 border-transparent">Voted</p>
+        <p class="tab-button flex items-center text-base md:text-xl cursor-pointer hover:text-blue-600 transition-colors border-b-2 border-transparent">Commented</p>
+    </div>
+    <div class="flex flex-col md:flex-row mt-1 w-4/5 items-start justify-between gap-x-2 px-6">
+        {{if index .Data "activity"}}
+        <div class="content-section relative flex flex-col mt-1 w-full">
+            <ul role="list" class="grid grid-cols-1 max-h-[850px] overflow-y-auto gap-x-6 gap-y-4">
+                {{range $post := index .Data "created"}}
+                <li class="overflow-hidden relative rounded-xl max-h-[180px] min-h-[180px] border border-gray-200">
+                    <a href="/view?id={{$post.PostID}}" class="inset-0 absolute z-20"></a>
+                    <div class="flex items-center gap-x-4 border-b border-gray-900/5 bg-gray-50 px-6 p-2">
+                        <div class="text-sm/6 font-medium text-gray-900 break-all overflow-hidden text-ellipsis">{{$post.PostTitle}}</div>
+                    </div>
+                    <dl class="-my-3 divide-y divide-gray-100 px-6 py-4 text-sm/6">
+                        <div class="flex justify-between gap-x-4 py-3">
+                            <dd class="text-gray-700 text-xs">{{$post.PostTimestamp}}</dd>
+                        </div>
+                        <div class="flex justify-between gap-x-4 py-3 mb-2">
+                            <dd class="flex items-start gap-x-2">
+                                <div class="font-medium text-gray-900 break-all overflow-hidden text-ellipsis">{{$post.ContentPreview}}</div>
+                            </dd>
+                        </div>
+                    </dl>
+                </li>
+                {{end}}
+            </ul>
+        </div>
+        <div class="content-section items-top flex flex-col mt-1 w-full">
+            <ul role="list" class="grid grid-cols-1 max-h-[850px] overflow-y-auto gap-x-6 gap-y-4">
+                {{range $post := index .Data "voted"}}
+                <li class="overflow-hidden rounded-xl max-h-[180px] min-h-[180px] relative border border-gray-200">
+                    <a href="/view?id={{$post.PostID}}" class="absolute inset-0 z-20"></a>
+                    <div class="flex items-center gap-x-4 border-b border-gray-900/5 bg-gray-50 px-6 p-2">
+                        <div class="text-sm/6 font-medium text-gray-900 break-all overflow-hidden text-ellipsis">{{$post.PostTitle}}</div>
+                    </div>
+                    <dl class="-my-3 divide-y divide-gray-100 px-6 py-2 text-sm/6">
+                        <div class="flex justify-between gap-x-4 py-3">
+                            <dd class="text-gray-700 text-xs">{{$post.Author}}</dd>
+                            <dd class="text-gray-700 text-xs">{{$post.PostTimestamp}}</dd>
+                        </div>
+                        <div class="flex justify-between gap-x-4 py-3 mb-2">
+                            <dd class="flex items-start gap-x-2">
+                                <div class="font-medium text-gray-900 break-all overflow-hidden text-ellipsis">{{$post.ContentPreview}}</div>
+                            </dd>
+                            <dd class="flex items-end justify-center">
+                                <div class="rounded-md px-2 py-1 text-xs font-medium ring-1 {{if eq $post.VoteType "upvote"}} text-blue-700 ring-blue-600/20 bg-blue-50 {{else}} bg-red-50 text-red-700 ring-red-600/20 {{end}} ring-inset">{{$post.VoteType}}d</div>
+                            </dd>
+                        </div>
+                    </dl>
+                </li>
+                {{end}}
+            </ul>
+        </div>
+         <div class="content-section items-top flex flex-col mt-1 w-full">
+            <ul role="list" class="grid grid-cols-1 max-h-[850px] overflow-y-auto gap-x-6 gap-y-4">
+                {{range $post := index .Data "commented"}}
+                <li class="overflow-hidden relative max-h-[180px] min-h-[180px] rounded-xl border border-gray-200">
+                    <a href="/view?id={{$post.PostID}}" class="absolute inset-0 z-20"></a>
+                    <div class="flex items-center gap-x-4 border-b border-gray-900/5 bg-gray-50 px-6 p-2">
+                        <div class="text-sm/6 font-medium text-gray-900 break-all overflow-hidden text-ellipsis">{{$post.PostTitle}}</div>
+                    </div>
+                    <dl class="-my-3 divide-y divide-gray-100 px-6 py-2 text-sm/6">
+                        <div class="flex justify-between gap-x-4 py-3">
+                            <dd class="text-gray-700 text-xs">{{$post.Author}}</dd>
+                            <dd class="text-gray-700 text-xs">{{$post.PostTimestamp}}</dd>
+                        </div>
+                        <div class="flex justify-between flex-col gap-x-4 py-3 mb-2">
+                            <dd class="flex items-start gap-x-2">
+                                <div class="text-sm text-gray-900 break-all overflow-hidden text-ellipsis">{{$post.ContentPreview}}</div>
+                            </dd>
+                            <dd class="flex items-end">
+                            <dd class="text-gray-700 text-xs">{{$post.CommentTimestamp}}</dd>
+                            <div class="font-medium text-gray-900 break-all overflow-hidden text-ellipsis">{{$post.CommentContent}}</div>
+                            </dd>
+                        </div>
+                    </dl>
+                </li>
+                {{end}}
+            </ul>
+        </div>
+        {{else}}
+        <div class="flex w-full mt-10">
+            You do not have any activity yet.
+        </div>
+        {{end}}
+    </div>
+</div>
+<script src="/assets/app/profile.js"></script>
+{{end}}
