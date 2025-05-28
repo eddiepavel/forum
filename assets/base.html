@@ -12,6 +12,9 @@
 <body class="h-full">
     {{template "nav" .}}
   {{end}}
+  {{if eq .Source "edit"}}
+    {{template "create" .}}
+  {{end}}
   {{if eq .Source "home"}}
     {{template "home" .}}
   {{end}}

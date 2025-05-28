@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"forum-app/helpers"
 	"forum-app/models"
+	"strconv"
 
 	"time"
 )
@@ -23,6 +24,38 @@ func (db *Connection) SetPost(title, content, author, categories, imagePath stri
 
 	_, err = db.DB.Exec(query, cleanTitle, categories, cleanContent, author, time.Now().Format("2006-01-02 15:04:05"), imagePath)
 	return err
+}
+
+func (db *Connection) UpdatePost(title, content, author, categories, postID string) error {
+	var authorID int
+	userID, err := strconv.Atoi(author)
+	if err != nil {
+		fmt.Println(err)
+	}
+	err = db.DB.QueryRow(`SELECT author FROM post WHERE id = ?`, postID).Scan(&authorID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return fmt.Errorf("post not found")
+		}
+	}
+	if authorID != userID {
+		return errors.New("403 Forbidden: You are not the author of this comment")
+	}
+	cleanTitle, cleanContent, err := helpers.SanitizePost(title, content)
+	if err != nil {
+		return err
+	}
+	query := `UPDATE post SET title = ?, categories = ?, content = ? WHERE id = ?`
+	result, err := db.DB.Exec(query, cleanTitle, categories, cleanContent, postID)
+	if err != nil {
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil || rowsAffected == 0 {
+		return fmt.Errorf("no rows updated")
+	}
+
+	return nil
 }
 
 // GetTotalPostCount retrieves the total number of posts based on the provided filter and user context.

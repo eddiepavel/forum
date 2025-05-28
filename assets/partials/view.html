@@ -17,6 +17,9 @@
             {{end}}
             {{if .User}}
               {{if eq .User.ID $post.Author.ID}}
+              <button data-action="edit-post" data-post-id="{{$post.ID}}" class="z-10 px-2 py-1 shadow-lg ring-1 ring-blue-600 bg-blue-50 ring-inset text-xs rounded-md hover:bg-blue-600 transition">
+                Edit
+              </button>
               <button data-action="delete-post" data-post-id="{{$post.ID}}" class="z-10 px-2 py-1 shadow-lg ring-1 ring-red-600 bg-red-50 ring-inset text-xs rounded-md hover:bg-red-600 transition">
                 Delete
               </button>
@@ -106,7 +109,7 @@
     </div>
   </div>
   {{range $index, $comment := $post.Comments}}
-  <div class="items-center w-full justify-center flex">
+  <div class="comment-container items-center w-full justify-center flex">
     <div class="w-4/5">
       <div class="mt-5 flex items-center w-full flexgap-x-4 border-t border-gray-900/5 px-6 pt-6">
         <dt class="flex justify-center items-center">
@@ -121,13 +124,25 @@
           <dd class="px-2 font-medium text-gray-900">{{$comment.Author.Username}}</dd>
         </a>
       </div>
-      <div class="flex items-center w-full flex-none gap-x-4 px-6">
+      <div class="flex items-center justify-between w-full flex-none gap-x-4 px-6">
         <dd class="text-xs pl-8 items-center text-gray-500">
           <time datetime="2023-01-31">{{$comment.Time}}</time>
         </dd>
+        <dd>
+          {{if $.User}}
+            {{if eq $.User.ID $comment.Author.ID}}
+            <button data-action="edit-comment" data-comment-id="{{$comment.ID}}" class="z-10 px-2 py-1 shadow-lg ring-1 ring-blue-600 bg-blue-50 ring-inset text-xs rounded-md hover:bg-blue-600 transition">
+              Edit
+            </button>
+            <button data-action="delete-comment" data-comment-id="{{$comment.ID}}" class="z-10 px-2 py-1 shadow-lg ring-1 ring-red-600 bg-red-50 ring-inset text-xs rounded-md hover:bg-red-600 transition">
+              Delete
+            </button>
+            {{end}}
+          {{end}}
+        </dd>
       </div>
       <div class="mt-2 flex w-full flex-none gap-x-4 px-6">
-        <dd class="text-sm pl-8 break-all overflow-hidden text-ellipsis">{{$comment.Content}}</dd>
+        <dd class="comment-content text-sm pl-8 break-all overflow-hidden text-ellipsis">{{$comment.Content}}</dd>
       </div>
       <div class="px-6 py-2">
         {{if not $.User}}
