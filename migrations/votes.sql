@@ -6,5 +6,5 @@ CREATE TABLE votes (
     vote_type TEXT NOT NULL CHECK(vote_type IN ('upvote', 'downvote')),
     FOREIGN KEY(user_id) REFERENCES user(id),
     CONSTRAINT fk_post_votes FOREIGN KEY(post_id) REFERENCES post(id) ON DELETE CASCADE,
-    FOREIGN KEY(comment_id) REFERENCES comment(id)
+    CONSTRAINT fk_comment_votes FOREIGN KEY(comment_id) REFERENCES comment(id) ON DELETE CASCADE
 );

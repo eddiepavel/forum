@@ -18,6 +18,7 @@ func GetView(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		view, err := render.PrepareView("view", r, app)
 		if err != nil {
+			fmt.Println(err)
 			render.RenderError(w, r, err)
 			return
 		}
@@ -38,7 +39,7 @@ func PostView(app *app.Application) http.HandlerFunc {
 
 		comment := r.FormValue("comment")
 		postId := r.FormValue("post_id")
-		authorId := r.FormValue("author_id")
+		authorId := r.FormValue("action_author_id")
 		user, _ := r.Context().Value(middleware.UserKey).(*models.Users)
 		if user == nil {
 			render.RenderError(w, r, errors.New("User not logged in"))
@@ -57,23 +58,87 @@ func PostView(app *app.Application) http.HandlerFunc {
 	}
 }
 
-// DeletePost handles the deletion of a post by its ID.
-func DeletePost(app *app.Application) http.HandlerFunc {
+// DeleteView handles the deletion of a post or comment by its ID.
+func DeleteView(app *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		postID, err := strconv.Atoi(r.URL.Query().Get("id"))
-		if err != nil || postID <= 0 {
-			render.RenderError(w, r, fmt.Errorf("invalid post ID"))
+		// Try post deletion first
+		postIDStr := r.URL.Query().Get("post_id")
+		commentIDStr := r.URL.Query().Get("comment_id")
+
+		user, _ := r.Context().Value(middleware.UserKey).(*models.Users)
+
+		if postIDStr != "" {
+			postID, err := strconv.Atoi(postIDStr)
+			if err != nil || postID <= 0 {
+				render.RenderError(w, r, fmt.Errorf("invalid post ID"))
+				return
+			}
+			err = app.DB.DeletePost(postID, user.ID)
+			if err != nil {
+				render.RenderError(w, r, err)
+				return
+			}
+			w.WriteHeader(http.StatusOK)
+			return
+		} else if commentIDStr != "" {
+			commentID, err := strconv.Atoi(commentIDStr)
+			if err != nil || commentID <= 0 {
+				render.RenderError(w, r, fmt.Errorf("invalid comment ID"))
+				return
+			}
+			err = app.DB.DeleteComment(commentID, user.ID)
+			if err != nil {
+				render.RenderError(w, r, err)
+				return
+			}
+			w.WriteHeader(http.StatusOK)
 			return
 		}
 
-		user, _ := r.Context().Value(middleware.UserKey).(*models.Users)
-		err = app.DB.DeletePost(postID, user.ID)
+		// If neither is set
+		render.RenderError(w, r, fmt.Errorf("neither post ID nor comment ID provided"))
+	}
+}
+
+func GetEditPost(app *app.Application) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		view, err := render.PrepareView("edit", r, app)
+		if err != nil {
+			render.RenderError(w, r, err)
+			return
+		}
+		err = view.Render(w, r)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(w, "Something went wrong", http.StatusInternalServerError)
+			return
+		}
+	}
+}
+
+func EditView(app *app.Application) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := r.ParseMultipartForm(10 << 20)
 		if err != nil {
 			render.RenderError(w, r, err)
 			return
 		}
 
+		user, _ := r.Context().Value(middleware.UserKey).(*models.Users)
+		content := r.FormValue("content")
+		id, err := strconv.Atoi(r.URL.Query().Get("comment_id"))
+		if err != nil || id <= 0 {
+			render.RenderError(w, r, fmt.Errorf("invalid comment ID"))
+			return
+		}
+
+		err = app.DB.UpdateComment(id, content, user.ID)
+		if err != nil {
+			render.RenderError(w, r, err)
+			return
+		}
 		w.WriteHeader(http.StatusOK)
+		return
 	}
 }
 
