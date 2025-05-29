@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home</title>
+  <link href="/assets/output.css" rel="stylesheet">
+  <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
+</head>
+{{if and (ne .Source "login") (ne .Source "register")}}
+<body class="h-full">
+    {{template "nav" .}}
+  {{end}}
+  {{if eq .Source "home"}}
+    {{template "home" .}}
+  {{end}}
+  {{if eq .Source "create"}}
+    {{template "create" .}}
+  {{end}}
+  {{if eq .Source "view"}}
+    {{template "view" .}}
+  {{end}}
+  {{if eq .Source "wip"}}
+    {{template "wip" .}}
+  {{end}}
+  {{if eq .Source "login"}}
+    {{template "login" .}}
+  {{end}}
+  {{if eq .Source "register"}}
+    {{template "register" .}}
+  {{end}}
+  <script src="/assets/app/app.js"></script>
+</body>
+</html>
