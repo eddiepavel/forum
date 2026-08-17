@@ -35,7 +35,7 @@ var categories = []string{
 // getUserAndSession retrieves the user and session from the request context.
 func getUserAndSession(r *http.Request) (*models.Users, *session.Session) {
 	user, _ := r.Context().Value(middleware.UserKey).(*models.Users)
-	session := r.Context().Value(middleware.SessionKey).(*session.Session)
+	session := r.Context().Value("user_session").(*session.Session)
 	if session.Data == nil {
 		session.Data = make(map[string]interface{})
 	}
@@ -73,7 +73,6 @@ func handleHomePage(r *http.Request, app *app.Application, user *models.Users, d
 	if err != nil {
 		return fmt.Errorf("invalid page number: %v", err)
 	}
-
 	totalPosts, err := app.DB.GetTotalPostCount(r.URL.Query().Get("category"), user)
 	if err != nil {
 		return err

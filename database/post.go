@@ -11,17 +11,17 @@ import (
 )
 
 // SetPost inserts a new post into the database with the given title, content, author, and categories.
-func (db *Connection) SetPost(title, content, author, categories string) error {
+func (db *Connection) SetPost(title, content, author, categories, imagePath string) error {
 	// Sanitize input
 	cleanTitle, cleanContent, err := helpers.SanitizePost(title, content)
 	if err != nil {
 		return err
 	}
 
-	query := `INSERT INTO post(title, categories, content, author, time)
-                VALUES(?, ?, ?, ?, ?)`
+	query := `INSERT INTO post(title, categories, content, author, time, image_path)
+          VALUES(?, ?, ?, ?, ?, ?)`
 
-	_, err = db.DB.Exec(query, cleanTitle, categories, cleanContent, author, time.Now().Format("2006-01-02 15:04:05"))
+	_, err = db.DB.Exec(query, cleanTitle, categories, cleanContent, author, time.Now().Format("2006-01-02 15:04:05"), imagePath)
 	return err
 }
 

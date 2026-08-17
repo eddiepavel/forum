@@ -11,8 +11,6 @@ type Users struct {
 	Email     string
 	Username  string
 	Password  string
-	Auth      string
-	Picture   string
 	Is_Admin  int
 	CreatedAt time.Time
 }
@@ -37,6 +35,7 @@ type Post struct {
 	CommentCount int
 	Comments     []Comment
 	UserVote     string
+	Image        string
 }
 
 type Comment struct {

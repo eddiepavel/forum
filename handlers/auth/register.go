@@ -70,7 +70,7 @@ func PostRegister(app *app.Application) http.HandlerFunc {
 			return
 		}
 
-		err = app.DB.RegisterUser(userEmail, userName, "email", userPassword)
+		err = app.DB.RegisterUser(userEmail, userName, userPassword)
 		if err != nil {
 			app.Logger.Info("Failed to hash password", "error", err)
 			render.RenderError(w, r, err)

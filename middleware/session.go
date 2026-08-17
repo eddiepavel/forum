@@ -7,10 +7,6 @@ import (
 	"time"
 )
 
-type ContextSessionKey string
-
-const SessionKey ContextSessionKey = "user_session"
-
 // SessionMiddleware ensures that each request has a valid session.
 // It creates a new session if none exists or refreshes the expiration time of an existing session.
 func SessionMiddleware(next http.HandlerFunc, app *app.Application) http.HandlerFunc {
@@ -28,7 +24,7 @@ func SessionMiddleware(next http.HandlerFunc, app *app.Application) http.Handler
 			}
 
 			http.SetCookie(w, sessionCookie)
-			ctx := context.WithValue(r.Context(), SessionKey, session)
+			ctx := context.WithValue(r.Context(), "user_session", session)
 
 			next(w, r.WithContext(ctx))
 			return
@@ -52,7 +48,7 @@ func SessionMiddleware(next http.HandlerFunc, app *app.Application) http.Handler
 			}
 
 			http.SetCookie(w, newSessionCookie)
-			ctx := context.WithValue(r.Context(), SessionKey, newSession)
+			ctx := context.WithValue(r.Context(), "user_session", newSession)
 
 			next(w, r.WithContext(ctx))
 			return
@@ -66,7 +62,7 @@ func SessionMiddleware(next http.HandlerFunc, app *app.Application) http.Handler
 			session.Data = make(map[string]interface{})
 		}
 
-		ctx := context.WithValue(r.Context(), SessionKey, session)
+		ctx := context.WithValue(r.Context(), "user_session", session)
 
 		next(w, r.WithContext(ctx))
 	})

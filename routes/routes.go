@@ -11,6 +11,7 @@ import (
 func Web(app *app.Application) http.Handler {
 	mux := http.NewServeMux()
 
+	mux.Handle("/uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir("./uploads"))))
 	mux.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets"))))
 	mux.HandleFunc("/", middleware.ChainMiddleware(forum.GetRedirect(app), []string{"auth"}, app))
 	mux.HandleFunc("GET /home", middleware.ChainMiddleware(forum.GetHome(app), []string{"auth"}, app))
@@ -26,8 +27,6 @@ func Web(app *app.Application) http.Handler {
 	mux.HandleFunc("DELETE /view", middleware.ChainMiddleware(auth.DeletePost(app), []string{"auth"}, app))
 	mux.HandleFunc("/wip", middleware.ChainMiddleware(forum.GetWIP(app), []string{"auth"}, app))
 	mux.HandleFunc("POST /vote", middleware.ChainMiddleware(auth.PostVote(app), []string{"auth"}, app))
-	mux.HandleFunc("GET /login/oauth/{type}", middleware.ChainMiddleware(auth.LoginOAuth(app), []string{}, app))
-	mux.HandleFunc("GET /login/oauth/callback/{type}", middleware.ChainMiddleware(auth.LoginOAuthCallback(app), []string{}, app))
 
 	return mux
 }

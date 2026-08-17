@@ -5,7 +5,6 @@ import (
 	"flag"
 	"forum-app/app"
 	"forum-app/database"
-	"forum-app/helpers/envutil"
 	"forum-app/ratelimiter"
 	"forum-app/routes"
 	"forum-app/session"
@@ -23,6 +22,12 @@ func main() {
 	dbName := flag.String("db", "app.db", "Database file name sqlite3")
 	flag.Parse()
 
+	// Check and create uploads directory
+	err := ensureUploadsDir()
+	if err != nil {
+		panic(err)
+	}
+
 	// Initialize logger
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
@@ -38,21 +43,12 @@ func main() {
 
 	rl := ratelimiter.NewRateLimiter(100, 1*time.Minute)
 
-	err = envutil.LoadEnv(".env")
-
-	if err != nil {
-		logger.Error("Application runtime error", "error", err)
-		os.Exit(1)
-		return
-	}
-
 	app := &app.Application{
 		DB:          db,
 		Logger:      logger,
 		Session:     session,
 		RateLimiter: rl,
 	}
-
 	// Create HTTP server
 	server := &http.Server{
 		Addr:    *addr,
@@ -70,6 +66,17 @@ func main() {
 
 	// Graceful shutdown
 	waitForShutdown(server, logger)
+}
+
+func ensureUploadsDir() error {
+	const uploadsDir = "uploads"
+	if _, err := os.Stat(uploadsDir); os.IsNotExist(err) {
+		err := os.Mkdir(uploadsDir, 0755)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func initDatabase(dbName string, logger *slog.Logger) (*database.Connection, error) {
