@@ -2,7 +2,7 @@
 <div class="mt-8 space-y-12 border-t flex flex-col justify-center border-gray-200 pt-10 sm:mt-8 sm:pt-10">
     {{range $post := index .Data "posts"}}
     <article class="w-full sm:max-w-[500px] flex flex-col items-start justify-between mx-auto border border-gray-200 p-4 rounded-lg shadow-xs hover:shadow-lg transition duration-300 ease-in-out relative">
-        <a href="/view?id={{$post.ID}}" class="absolute inset-0 z-20"></a>
+        <a href="/view?id={{$post.ID}}" class="absolute inset-0 z-10"></a>
         <div class="flex w-full items-center justify-between text-xs flex-wrap gap-y-2">
             <time datetime="2020-03-16" class="text-gray-500">{{$post.Time}}</time>
             <div class="flex flex-wrap-reverse items-center justify-end lg:gap-x-1">
@@ -11,21 +11,14 @@
                 {{end}}
             </div>
         </div>
-        <div class="group relative flex justify-between items-center flex-row w-full">
-            <div class="relative z-10 flex flex-col items-start justify-between w-full">
-                <h3 class="mt-3 text-lg/6 font-semibold text-gray-900 group-hover:text-gray-600 break-all overflow-hidden text-ellipsis">
-                    <span class="absolute inset-0"></span>
-                    {{$post.Title}}
-                </h3>
-                <p class="mt-5 line-clamp-3 text-sm/6 text-gray-600 break-all overflow-hidden text-ellipsis">
-                    {{$post.Content}}
-                </p>
-            </div>
-            {{if $post.Image}}
-            <div class="relative flex h-full w-1/4 overflow-hidden rounded-lg mr-2 mt-5 items-center">
-                <img src="{{$post.Image}}" alt="" class="h-full w-full object-cover object-center">
-            </div>
-            {{end}}
+        <div class="group relative">
+            <h3 class="mt-3 text-lg/6 font-semibold text-gray-900 group-hover:text-gray-600 break-all overflow-hidden text-ellipsis">
+                <span class="absolute inset-0"></span>
+                {{$post.Title}}
+            </h3>
+            <p class="mt-5 line-clamp-3 text-sm/6 text-gray-600 break-all overflow-hidden text-ellipsis">
+                {{$post.Content}}
+            </p>
         </div>
         <div class="relative mt-8 flex items-center justify-between w-full">
             <div class="flex items-center gap-x-2">
@@ -36,7 +29,7 @@
                   </span>
                 <div class="text-sm/6">
                     <p class="font-semibold text-gray-900">
-                        <a href="/profile/{{$post.Author.ID}}" class="relative z-20">
+                        <a href="/wip" class="relative z-20">
                             <span class="absolute inset-0"></span>
                             {{$post.Author.Username}}
                         </a>

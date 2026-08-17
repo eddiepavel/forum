@@ -91,7 +91,7 @@ func (v *Validator) ValidateInput(value interface{}, rules []interface{}, key st
 
 // ValidateRequest validates HTTP request inputs based on provided rules and returns errors if any.
 func ValidateRequest(r *http.Request, inputs map[string][]interface{}, app *app.Application) (bool, map[string]string) {
-	r.ParseMultipartForm(10 << 20)
+	r.ParseForm()
 
 	v := NewValidator(app)
 	errors := make(map[string]string)

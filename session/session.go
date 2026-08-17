@@ -1,11 +1,11 @@
 package session
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"sync"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 // Session represents a user session.
@@ -105,9 +105,13 @@ func (s *SessionStore) RefreshSession(id string) bool {
 }
 
 // generateSessionID creates a random 32-character hexadecimal session ID.
-// generateSessionID returns a new random (v4) UUID string.
 func generateSessionID() string {
-	return uuid.New().String()
+	b := make([]byte, 16)
+	if _, err := rand.Read(b); err != nil {
+		// Fallback: use the current timestamp if random generation fails.
+		return fmt.Sprintf("%d", time.Now().UnixNano())
+	}
+	return hex.EncodeToString(b)
 }
 
 // Flash message utilities on the Session type:

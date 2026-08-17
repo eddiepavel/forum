@@ -12,9 +12,6 @@
 <body class="h-full">
     {{template "nav" .}}
   {{end}}
-  {{if eq .Source "edit"}}
-    {{template "create" .}}
-  {{end}}
   {{if eq .Source "home"}}
     {{template "home" .}}
   {{end}}
@@ -23,9 +20,6 @@
   {{end}}
   {{if eq .Source "view"}}
     {{template "view" .}}
-  {{end}}
-  {{if eq .Source "profile"}}
-    {{template "profile" .}}
   {{end}}
   {{if eq .Source "wip"}}
     {{template "wip" .}}

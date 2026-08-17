@@ -57,17 +57,9 @@ func PrepareView(source string, r *http.Request, app *app.Application) (View, er
 		if err := handleViewPage(r, app, &data); err != nil {
 			return View{}, err
 		}
-	case "edit":
-		if err := handleViewPage(r, app, &data); err != nil {
-			return View{}, err
-		}
-	case "profile":
-		if err := handleProfilePage(r, app, user, &data); err != nil {
-			return View{}, err
-		}
 	}
 
-	if source == "create" || source == "home" || source == "edit" {
+	if source == "create" || source == "home" {
 		setCategories(&data)
 	}
 

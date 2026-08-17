@@ -19,13 +19,8 @@ func AuthMiddleware(next http.HandlerFunc, app *app.Application) http.HandlerFun
 
 		cookie, err := r.Cookie("auth-token")
 
-		if (r.URL.Path == "/home" || r.URL.Path == "/view") && cookie == nil {
-			next(w, r)
-			return
-		}
-
 		if err != nil {
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			next(w, r)
 			return
 		}
 

@@ -20,7 +20,6 @@ func ChainMiddleware(h http.HandlerFunc, k []string, app *app.Application) http.
 		"session":   SessionMiddleware,
 		"csrf":      CsrfTokenMiddlware,
 		"ratelimit": RateLimitMiddleware,
-		"event":     EventMiddleware,
 	}
 
 	globalMiddle := []string{"logs", "headers", "csrf", "session", "ratelimit"}

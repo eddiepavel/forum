@@ -9,7 +9,7 @@ import (
 
 // Build select query for posts depending on the filter and the user auth status.
 func (db *Connection) buildHomeQuery(filter string, user *models.Users) (string, []interface{}) {
-	query := `SELECT p.id, p.title, p.categories, p.content, p.author, p.time, p.upvotes, p.downvotes, p.image_path, 
+	query := `SELECT p.id, p.title, p.categories, p.content, p.author, p.time, p.upvotes, p.downvotes, 
                  (SELECT COUNT(*) FROM comment c WHERE c.post_id = p.id) AS comment_count
           FROM post p 
           JOIN user u ON p.author = u.id`
@@ -55,7 +55,6 @@ func (db *Connection) scanPostRow(rows *sql.Rows) (models.Post, error) {
 	var categories string
 	var userID int
 	var timeRaw time.Time
-	var imagePath sql.NullString
 
 	err := rows.Scan(
 		&post.ID,
@@ -66,7 +65,6 @@ func (db *Connection) scanPostRow(rows *sql.Rows) (models.Post, error) {
 		&timeRaw,
 		&post.Upvotes,
 		&post.Downvotes,
-		&imagePath,
 		&post.CommentCount,
 	)
 	if err != nil {
@@ -74,23 +72,20 @@ func (db *Connection) scanPostRow(rows *sql.Rows) (models.Post, error) {
 	}
 
 	post.Author, err = db.GetUserById(userID)
-
 	if err != nil {
 		return post, err
 	}
 
 	post.Time = timeRaw.Format("2006-01-02 15:04:05")
 	post.Categories = strings.Split(categories, ",")
-	if imagePath.Valid {
-		post.Image = imagePath.String
-	}
+
 	return post, nil
 }
 
 // The function returns the populated Post model or an error if any occurs.
 // It fetches the post details from the database using the provided post ID.
 func (db *Connection) fetchPostByID(id int) (models.Post, error) {
-	query := `SELECT p.id, p.title, p.categories, p.content, p.author, p.time, p.upvotes, p.downvotes, p.vote_count, p.image_path 
+	query := `SELECT p.id, p.title, p.categories, p.content, p.author, p.time, p.upvotes, p.downvotes, p.vote_count 
               FROM post p 
               JOIN user u ON p.author = u.id 
               WHERE p.id = ?`
@@ -98,7 +93,6 @@ func (db *Connection) fetchPostByID(id int) (models.Post, error) {
 	var categories string
 	var userID int
 	var timeRaw time.Time
-	var imagePath sql.NullString
 
 	err := db.DB.QueryRow(query, id).Scan(
 		&post.ID,
@@ -110,7 +104,6 @@ func (db *Connection) fetchPostByID(id int) (models.Post, error) {
 		&post.Upvotes,
 		&post.Downvotes,
 		&post.VoteCount,
-		&imagePath,
 	)
 	if err != nil {
 		return post, err
@@ -123,9 +116,6 @@ func (db *Connection) fetchPostByID(id int) (models.Post, error) {
 
 	post.Time = timeRaw.Format("2006-01-02 15:04:05")
 	post.Categories = strings.Split(categories, ",")
-	if imagePath.Valid {
-		post.Image = imagePath.String
-	}
 
 	return post, nil
 }
@@ -134,7 +124,7 @@ func (db *Connection) fetchPostByID(id int) (models.Post, error) {
 // It retrieves the comments based on the post ID and user ID.
 // The function returns a slice of Comment models or an error if any occurs.
 func (db *Connection) fetchPostComments(postID, userID int) ([]models.Comment, error) {
-	query := `SELECT c.id, c.content, c.author, c.time, c.upvotes, c.downvotes, c.vote_count FROM comment c WHERE c.post_id = ? ORDER BY c.time DESC`
+	query := `SELECT c.id, c.content, c.author, c.time, c.upvotes, c.downvotes, c.vote_count FROM comment c WHERE c.post_id = ?`
 	rows, err := db.DB.Query(query, postID)
 	if err != nil {
 		return nil, err

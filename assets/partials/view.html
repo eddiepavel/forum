@@ -17,9 +17,6 @@
             {{end}}
             {{if .User}}
               {{if eq .User.ID $post.Author.ID}}
-              <button data-action="edit-post" data-post-id="{{$post.ID}}" class="z-10 px-2 py-1 shadow-lg ring-1 ring-blue-600 bg-blue-50 ring-inset text-xs rounded-md hover:bg-blue-600 transition">
-                Edit
-              </button>
               <button data-action="delete-post" data-post-id="{{$post.ID}}" class="z-10 px-2 py-1 shadow-lg ring-1 ring-red-600 bg-red-50 ring-inset text-xs rounded-md hover:bg-red-600 transition">
                 Delete
               </button>
@@ -36,7 +33,7 @@
               </svg>
             </span>
           </dt>
-          <a href="/profile/{{$post.Author.ID}}">
+          <a href="/wip">
             <dd class="px-2 font-medium text-gray-900">{{$post.Author.Username}}</dd>
           </a>
         </div>
@@ -49,11 +46,6 @@
           <dd class="text-sm pl-8 break-all overflow-hidden text-ellipsis">{{$post.Content}}</dd>
         </div>
       </dl>
-      {{if $post.Image}}
-      <div class="flex items-center justify-center w-full flex-none gap-x-4 px-6">
-        <img src="{{$post.Image}}" alt="Post Image" class="mt-2 w-1/2 h-auto rounded-lg shadow-md">
-      </div>
-      {{end}}
       <div class="mt-6 border-t border-gray-900/5 px-6 py-6">
         {{if not .User}}
         <a href="/login">
@@ -61,10 +53,6 @@
           <input type="hidden" id="redirect-link" value="{{.Redirect}}">
         </form>
         {{end}}
-          {{if .User}}
-            <input type="hidden" id="post-author-id" value="{{$post.Author.ID}}">
-            <input type="hidden" id="action-author-id" value="{{.User.ID}}">
-          {{end}}
         <span class="isolate inline-flex rounded-md shadow-xs">
             <button {{if .User}} id="upvote-post-{{$post.ID}}" data-vote-state="{{$post.UserVote}}" {{end}} type="button" class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset focus:z-10" >
               <span class="sr-only">Upvote</span>
@@ -93,13 +81,12 @@
       {{if .User}}
       <label for="comment" class="block text-sm/6 font-medium text-gray-900"></label>
       <div>
-        <form method="post" id="comment-form" action="/view" enctype="multipart/form-data">
+        <form method="post" id="comment-form" action="/view">
           <input type="hidden" name="post_id" value="{{$post.ID}}">
-          <textarea rows="2" name="comment" id="comment" required placeholder="Add your comment..." class="block w-full resize-none rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
           <input id="csrf" type="hidden" name="csrf" value="{{index .Session.Data "csrf" }}">
-          <input type="hidden" name="post_author_id" value="{{$post.Author.ID}}">
-          <input type="hidden" name="action_author_id" value="{{.User.ID}}">
+          <input type="hidden" name="author_id" value="{{.User.ID}}">
           <input type="hidden" name="redirect" value="/view?id={{$post.ID}}">
+          <textarea rows="2" name="comment" id="comment" required placeholder="Add your comment..." class="block w-full resize-none rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
           <div class="flex mt-2 justify-end">
             <button type="submit" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Post</button>
           </div>
@@ -109,7 +96,7 @@
     </div>
   </div>
   {{range $index, $comment := $post.Comments}}
-  <div class="comment-container items-center w-full justify-center flex">
+  <div class="items-center w-full justify-center flex">
     <div class="w-4/5">
       <div class="mt-5 flex items-center w-full flexgap-x-4 border-t border-gray-900/5 px-6 pt-6">
         <dt class="flex justify-center items-center">
@@ -124,25 +111,13 @@
           <dd class="px-2 font-medium text-gray-900">{{$comment.Author.Username}}</dd>
         </a>
       </div>
-      <div class="flex items-center justify-between w-full flex-none gap-x-4 px-6">
+      <div class="flex items-center w-full flex-none gap-x-4 px-6">
         <dd class="text-xs pl-8 items-center text-gray-500">
           <time datetime="2023-01-31">{{$comment.Time}}</time>
         </dd>
-        <dd>
-          {{if $.User}}
-            {{if eq $.User.ID $comment.Author.ID}}
-            <button data-action="edit-comment" data-comment-id="{{$comment.ID}}" class="z-10 px-2 py-1 shadow-lg ring-1 ring-blue-600 bg-blue-50 ring-inset text-xs rounded-md hover:bg-blue-600 transition">
-              Edit
-            </button>
-            <button data-action="delete-comment" data-comment-id="{{$comment.ID}}" class="z-10 px-2 py-1 shadow-lg ring-1 ring-red-600 bg-red-50 ring-inset text-xs rounded-md hover:bg-red-600 transition">
-              Delete
-            </button>
-            {{end}}
-          {{end}}
-        </dd>
       </div>
       <div class="mt-2 flex w-full flex-none gap-x-4 px-6">
-        <dd class="comment-content text-sm pl-8 break-all overflow-hidden text-ellipsis">{{$comment.Content}}</dd>
+        <dd class="text-sm pl-8 break-all overflow-hidden text-ellipsis">{{$comment.Content}}</dd>
       </div>
       <div class="px-6 py-2">
         {{if not $.User}}

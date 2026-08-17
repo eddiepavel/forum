@@ -20,9 +20,7 @@ var files = []string{
 	"./assets/partials/view.html",
 	"./assets/partials/wip.html",
 	"./assets/partials/login.html",
-	"./assets/partials/register.html",
-	"./assets/partials/notifications.html",
-	"./assets/partials/profile.html"}
+	"./assets/partials/register.html"}
 
 var categories = []string{
 	"General",
@@ -31,7 +29,7 @@ var categories = []string{
 	"Sports",
 	"News",
 	"Gaming",
-	"Announcements",
+	"Anouncements",
 	"Other"}
 
 // getUserAndSession retrieves the user and session from the request context.
@@ -75,6 +73,7 @@ func handleHomePage(r *http.Request, app *app.Application, user *models.Users, d
 	if err != nil {
 		return fmt.Errorf("invalid page number: %v", err)
 	}
+
 	totalPosts, err := app.DB.GetTotalPostCount(r.URL.Query().Get("category"), user)
 	if err != nil {
 		return err
@@ -98,46 +97,6 @@ func handleHomePage(r *http.Request, app *app.Application, user *models.Users, d
 		data.Data["fromPosts"] = 1 + ((pageNum - 1) * pageSize)
 		data.Data["toPosts"] = len(posts) + ((pageNum - 1) * pageSize)
 	}
-	return nil
-}
-
-func handleProfilePage(r *http.Request, app *app.Application, user *models.Users, data *models.PageData) error {
-	id, err := strconv.Atoi(r.PathValue("UserID"))
-	if err != nil {
-		return errors.New("invalid user ID")
-	}
-	activity, err := app.DB.GetUserActivity(id)
-	if activity == nil {
-		data.Data["activity"] = false
-		return nil
-	}
-	if err != nil {
-		return err
-	}
-	var created, voted, commented []models.UserPostActivity
-	for _, a := range activity {
-		if a.EventType == "created" {
-			created = append(created, a)
-			continue
-		}
-		if a.EventType == "voted" {
-			voted = append(voted, a)
-			continue
-		}
-		if a.EventType == "commented" {
-			commented = append(commented, a)
-		}
-	}
-	data.Data["activity"] = true
-	data.Data["userID"] = id
-	userProf, err := app.DB.GetUserById(id)
-	if err != nil {
-		return err
-	}
-	data.Data["username"] = userProf.Username
-	data.Data["created"] = created
-	data.Data["voted"] = voted
-	data.Data["commented"] = commented
 	return nil
 }
 

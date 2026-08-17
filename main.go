@@ -5,6 +5,7 @@ import (
 	"flag"
 	"forum-app/app"
 	"forum-app/database"
+	"forum-app/helpers/envutil"
 	"forum-app/ratelimiter"
 	"forum-app/routes"
 	"forum-app/session"
@@ -36,6 +37,14 @@ func main() {
 	session := session.NewSessionStore(1*time.Hour, 1*time.Hour)
 
 	rl := ratelimiter.NewRateLimiter(100, 1*time.Minute)
+
+	err = envutil.LoadEnv(".env")
+
+	if err != nil {
+		logger.Error("Application runtime error", "error", err)
+		os.Exit(1)
+		return
+	}
 
 	app := &app.Application{
 		DB:          db,
